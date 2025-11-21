@@ -1,3 +1,10 @@
+## [1.0.5](https://github.com/l4rm4nd/MemeLord/compare/v1.0.4...v1.0.5) (2025-11-21)
+
+
+### Bug Fixes
+
+* tag editing on detail page ([c3eeea3](https://github.com/l4rm4nd/MemeLord/commit/c3eeea3d9c6f4ca13c06942ebc9c5737c90e10a1))
+
 ## [1.0.4](https://github.com/l4rm4nd/MemeLord/compare/v1.0.3...v1.0.4) (2025-11-20)
 
 
