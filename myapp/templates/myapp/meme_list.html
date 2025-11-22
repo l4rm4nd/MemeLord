@@ -14,7 +14,7 @@
     </h1>
 
   <div class="d-flex align-items-center gap-2 flex-grow-1 justify-content-end">
-    <!-- Tag search, smaller + max width -->
+    <!-- Tag search -->
     <div class="position-relative" style="max-width: 260px; width: 100%;">
       <input type="text"
              id="tag-filter-input"
@@ -22,7 +22,7 @@
              placeholder="Filter by tag">
         <div id="tag-filter-suggestions"
              class="position-absolute w-100 bg-body border border-secondary-subtle mt-1 rounded-3 shadow-sm d-none"
-             style="z-index: 1000;">
+             style="z-index: 1000; max-height: 300px; overflow-y: auto;">
         </div>
     </div>
 
@@ -47,27 +47,21 @@
   {% include "myapp/partials/meme_grid.html" %}
 </div>
 
-<!-- Fallback pagination for no-JS -->
+<!-- Fallback pagination (no JS) -->
 <nav aria-label="Page navigation" class="mt-4 d-none" id="pagination-fallback">
   <ul class="pagination justify-content-center">
     {% if page_obj.has_previous %}
-      <li class="page-item">
-        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
-      </li>
+      <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
     {% else %}
       <li class="page-item disabled"><span class="page-link">Previous</span></li>
     {% endif %}
 
     <li class="page-item disabled">
-      <span class="page-link">
-        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-      </span>
+      <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
     </li>
 
     {% if page_obj.has_next %}
-      <li class="page-item">
-        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
-      </li>
+      <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
     {% else %}
       <li class="page-item disabled"><span class="page-link">Next</span></li>
     {% endif %}
@@ -84,7 +78,6 @@
 <!-- Modern Lightbox Overlay -->
 <div id="meme-lightbox" class="lightbox-overlay">
   <div class="lightbox-container">
-    <!-- Close button -->
     <button type="button" class="lightbox-close" id="lightbox-close" aria-label="Close">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -92,22 +85,18 @@
       </svg>
     </button>
 
-    <!-- Navigation zones -->
-    <div class="lightbox-nav-left" id="lightbox-nav-left" title="Previous (←)"></div>
-    <div class="lightbox-nav-right" id="lightbox-nav-right" title="Next (→)"></div>
+    <div class="lightbox-nav-left" id="lightbox-nav-left" title="Previous (Left Arrow)"></div>
+    <div class="lightbox-nav-right" id="lightbox-nav-right" title="Next (Right Arrow)"></div>
 
-    <!-- Content area -->
     <div class="lightbox-content" id="lightbox-content">
       <div class="lightbox-media-container" id="lightbox-media"></div>
     </div>
 
-    <!-- Bottom info bar -->
     <div class="lightbox-info" id="lightbox-info">
       <div class="lightbox-title" id="lightbox-title"></div>
       <div class="lightbox-meta" id="lightbox-meta"></div>
     </div>
 
-    <!-- Counter -->
     <div class="lightbox-counter" id="lightbox-counter"></div>
   </div>
 </div>
@@ -116,178 +105,64 @@
   .lightbox-overlay {
     display: none;
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(0, 0, 0, 0.95);
     z-index: 10000;
     opacity: 0;
     transition: opacity 0.3s ease;
-  }
-
-  .lightbox-overlay.active {
-    display: flex;
-    opacity: 1;
-  }
-
-  .lightbox-container {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .lightbox-close {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 44px;
-    height: 44px;
-    border: none;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    color: white;
-    border-radius: 50%;
-    cursor: pointer;
-    z-index: 10002;
-    display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s ease;
   }
+  .lightbox-overlay.active { display: flex; opacity: 1; }
 
-  .lightbox-close:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: scale(1.1);
+  .lightbox-close, .lightbox-nav-left::before, .lightbox-nav-right::before, .lightbox-counter {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
   }
+  .lightbox-close { position: absolute; top: 20px; right: 20px; width: 44px; height: 44px; border: none; border-radius: 50%; color: white; cursor: pointer; z-index: 10002; }
+  .lightbox-close:hover { background: rgba(255, 255, 255, 0.2); transform: scale(1.1); }
 
-  .lightbox-nav-left,
-  .lightbox-nav-right {
+  .lightbox-nav-left, .lightbox-nav-right {
     position: absolute;
-    top: 0;
-    bottom: 80px;
+    top: 0; bottom: 80px;
     width: 30%;
     cursor: pointer;
     z-index: 10001;
     display: flex;
     align-items: center;
-    transition: background 0.2s ease;
   }
+  .lightbox-nav-left { left: 0; justify-content: flex-start; padding-left: 20px; }
+  .lightbox-nav-right { right: 0; justify-content: flex-end; padding-right: 20px; }
+  .lightbox-nav-left:hover, .lightbox-nav-right:hover { background: rgba(255, 255, 255, 0.03); }
+  .lightbox-nav-left::before { content: '‹'; font-size: 40px; opacity: 0; transition: opacity 0.2s; }
+  .lightbox-nav-right::before { content: '›'; font-size: 40px; opacity: 0; transition: opacity 0.2s; }
+  .lightbox-nav-left:hover::before, .lightbox-nav-right:hover::before { opacity: 1; }
 
-  .lightbox-nav-left {
-    left: 0;
-    justify-content: flex-start;
-    padding-left: 20px;
-  }
-
-  .lightbox-nav-right {
-    right: 0;
-    justify-content: flex-end;
-    padding-right: 20px;
-  }
-
-  .lightbox-nav-left:hover,
-  .lightbox-nav-right:hover {
-    background: rgba(255, 255, 255, 0.03);
-  }
-
-  .lightbox-nav-left::before,
-  .lightbox-nav-right::before {
-    content: '';
-    width: 40px;
-    height: 40px;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    font-size: 24px;
-    color: white;
-  }
-
-  .lightbox-nav-left:hover::before,
-  .lightbox-nav-right:hover::before {
-    opacity: 1;
-  }
-
-  .lightbox-nav-left::before {
-    content: '‹';
-    line-height: 40px;
-    text-align: center;
-  }
-
-  .lightbox-nav-right::before {
-    content: '›';
-    line-height: 40px;
-    text-align: center;
-  }
-
-  .lightbox-content {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 80px 20px 100px;
-    overflow: hidden;
-  }
-
-  .lightbox-media-container {
-    max-width: 100%;
-    max-height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
+  .lightbox-content { flex: 1; display: flex; align-items: center; justify-content: center; padding: 80px 20px 100px; }
+  .lightbox-media-container { max-width: 100%; max-height: 100%; display: flex; align-items: center; justify-content: center; position: relative; }
   .lightbox-media-container img,
   .lightbox-media-container video {
-    display: block;
     max-width: 100%;
     max-height: 100%;
-    width: auto;
-    height: auto;
     object-fit: contain;
-    border-radius: 4px;
-    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+    box-shadow: 0 10px 60px rgba(0, 0, 0, 0.7);
+    transition: width 0.35s cubic-bezier(0.2, 0.8, 0.4, 1), height 0.35s cubic-bezier(0.2, 0.8, 0.4, 1);
+    image-rendering: -webkit-optimize-contrast;
   }
 
   .lightbox-info {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    bottom: 0; left: 0; right: 0;
     padding: 20px 40px;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
     color: white;
     z-index: 10001;
   }
-
-  .lightbox-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 5px;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-  }
-
-  .lightbox-meta {
-    font-size: 0.9rem;
-    opacity: 0.9;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-  }
-
-  .lightbox-meta a {
-    color: #6ea8fe;
-    text-decoration: none;
-  }
-
-  .lightbox-meta a:hover {
-    text-decoration: underline;
-  }
+  .lightbox-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 5px; }
+  .lightbox-meta { font-size: 0.9rem; opacity: 0.9; }
+  .lightbox-meta a { color: #6ea8fe; text-decoration: none; }
+  .lightbox-meta a:hover { text-decoration: underline; }
 
   .lightbox-counter {
     position: absolute;
@@ -295,438 +170,290 @@
     left: 50%;
     transform: translateX(-50%);
     padding: 8px 16px;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    color: white;
     border-radius: 20px;
+    color: white;
     font-size: 0.9rem;
     z-index: 10002;
   }
 
-  /* Loading animation */
+  /* Loading spinner */
   .lightbox-media-container.loading::after {
     content: '';
-    width: 40px;
-    height: 40px;
-    border: 3px solid rgba(255, 255, 255, 0.3);
+    position: absolute;
+    width: 50px; height: 50px;
+    border: 4px solid rgba(255,255,255,0.3);
     border-top-color: white;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
   }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-
-  /* Mobile adjustments */
   @media (max-width: 768px) {
-    .lightbox-nav-left,
-    .lightbox-nav-right {
-      width: 25%;
-    }
-
-    .lightbox-info {
-      padding: 15px 20px;
-    }
-
-    .lightbox-title {
-      font-size: 1rem;
-    }
-
-    .lightbox-meta {
-      font-size: 0.8rem;
-    }
-
-    .lightbox-close {
-      top: 10px;
-      right: 10px;
-    }
+    .lightbox-info { padding: 15px 20px; }
+    .lightbox-title { font-size: 1rem; }
+    .lightbox-close { top: 10px; right: 10px; }
+    .lightbox-nav-left, .lightbox-nav-right { width: 25%; }
   }
 </style>
 
 <script>
-    // Infinite scroll
-    (function() {
-      const grid = document.getElementById("meme-grid");
-      const sentinel = document.getElementById("scroll-sentinel");
-      const loader = document.getElementById("infinite-loader");
-      const paginationFallback = document.getElementById("pagination-fallback");
+  // === Infinite Scroll ===
+  (function() {
+    const grid = document.getElementById("meme-grid");
+    const sentinel = document.getElementById("scroll-sentinel");
+    const loader = document.getElementById("infinite-loader");
+    if (!grid || !sentinel) return;
 
-      if (!grid || !sentinel) {
-        return;
-      }
+    let nextPage = {% if page_obj.has_next %}{{ page_obj.next_page_number }}{% else %}null{% endif %};
+    let loading = false;
 
-      if (paginationFallback) {
-        paginationFallback.classList.add("d-none");
-      }
+    function loadMore() {
+      if (!nextPage || loading) return;
+      loading = true;
+      loader?.classList.remove("d-none");
 
-      let nextPage = {% if page_obj.has_next %}{{ page_obj.next_page_number }}{% else %}null{% endif %};
-      let loading = false;
+      const url = new URL(window.location.href);
+      url.searchParams.set("page", nextPage);
 
-      function loadMore() {
-        if (!nextPage || loading) {
-          return;
-        }
-        loading = true;
-        if (loader) {
-          loader.classList.remove("d-none");
-        }
-
-        const url = new URL(window.location.href);
-        url.searchParams.set("page", nextPage);
-
-        fetch(url.toString(), {
-          headers: {
-            "X-Requested-With": "XMLHttpRequest"
-          }
-        })
-        .then(response => response.json())
+      fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } })
+        .then(r => r.json())
         .then(data => {
-          if (data.html) {
-            grid.insertAdjacentHTML("beforeend", data.html);
-          }
-
-          if (data.has_next) {
-            nextPage = data.next_page_number;
-          } else {
-            nextPage = null;
-            if (observer) {
-              observer.disconnect();
-            }
-          }
-        })
-        .catch(err => {
-          console.error("Error loading more memes:", err);
+          if (data.html) grid.insertAdjacentHTML("beforeend", data.html);
+          nextPage = data.has_next ? data.next_page_number : null;
+          if (!nextPage && observer) observer.disconnect();
         })
         .finally(() => {
           loading = false;
-          if (loader) {
-            loader.classList.add("d-none");
-          }
+          loader?.classList.add("d-none");
         });
-      }
+    }
 
-      const observer = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            loadMore();
-          }
-        });
-      }, {
-        root: null,
-        rootMargin: "200px",
-        threshold: 0
-      });
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) loadMore();
+    }, { rootMargin: "300px" });
 
-      if (nextPage) {
-        observer.observe(sentinel);
-      }
-    })();
+    if (nextPage) observer.observe(sentinel);
+  })();
 
-    // Tag search & suggestions
-    (function() {
-      const input = document.getElementById("tag-filter-input");
-      const box = document.getElementById("tag-filter-suggestions");
-      if (!input || !box) return;
+  // === Tag Suggestions ===
+  (function() {
+    const input = document.getElementById("tag-filter-input");
+    const box = document.getElementById("tag-filter-suggestions");
+    if (!input || !box) return;
 
-      let timeout = null;
-
-      function renderSuggestions(results) {
-        if (!results.length) {
-          box.classList.add("d-none");
-          box.innerHTML = "";
-          return;
-        }
-
-        box.innerHTML = "";
-        results.forEach(tag => {
-          const btn = document.createElement("button");
-          btn.type = "button";
-          btn.className = "btn btn-sm btn-outline-secondary m-1";
-          btn.textContent = "#" + tag.name;
-          btn.addEventListener("click", function() {
-            const url = new URL(window.location.href);
-            url.searchParams.set("tag", tag.slug);
-            url.searchParams.delete("page");
-            window.location.href = url.toString();
-          });
-          box.appendChild(btn);
-        });
-        box.classList.remove("d-none");
-      }
-
-      function fetchSuggestions(query) {
-        const url = "{% url 'myapp:tag_suggestions' %}?q=" + encodeURIComponent(query || "");
-
-        fetch(url, {
-          headers: {
-            "X-Requested-With": "XMLHttpRequest"
-          }
-        })
-        .then(res => res.json())
+    let timeout = null;
+    function fetchSuggestions(q) {
+      fetch("{% url 'myapp:tag_suggestions' %}?q=" + encodeURIComponent(q))
+        .then(r => r.json())
         .then(data => {
-          renderSuggestions(data.results || []);
-        })
-        .catch(() => {
-          box.classList.add("d-none");
-        });
-      }
-
-      input.addEventListener("input", function() {
-        const value = input.value.trim();
-        if (timeout) {
-          clearTimeout(timeout);
-        }
-        timeout = setTimeout(() => fetchSuggestions(value), 200);
-      });
-
-      input.addEventListener("focus", function() {
-        if (!input.value.trim()) {
-          fetchSuggestions("");
-        }
-      });
-
-      document.addEventListener("click", function(e) {
-        if (!box.contains(e.target) && e.target !== input) {
-          box.classList.add("d-none");
-        }
-      });
-    })();
-
-    // Modern Lightbox
-    (function() {
-      const lightbox = document.getElementById("meme-lightbox");
-      const mediaContainer = document.getElementById("lightbox-media");
-      const titleEl = document.getElementById("lightbox-title");
-      const metaEl = document.getElementById("lightbox-meta");
-      const counterEl = document.getElementById("lightbox-counter");
-      const closeBtn = document.getElementById("lightbox-close");
-      const navLeft = document.getElementById("lightbox-nav-left");
-      const navRight = document.getElementById("lightbox-nav-right");
-
-      if (!lightbox) return;
-
-      let items = [];
-      let currentIndex = -1;
-      let touchStartX = 0;
-      let touchStartY = 0;
-
-      function decodeText(text) {
-        if (!text) return "";
-        return text.replace(/\\u[\dA-Fa-f]{4}/g, function(match) {
-          return String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16));
-        });
-      }
-
-      function collectItems() {
-        items = Array.from(document.querySelectorAll("[data-meme-open]"));
-      }
-
-      function showLightbox() {
-        lightbox.style.display = "flex";
-        setTimeout(() => lightbox.classList.add("active"), 10);
-        document.body.style.overflow = "hidden";
-      }
-
-      function hideLightbox() {
-        lightbox.classList.remove("active");
-        setTimeout(() => {
-          lightbox.style.display = "none";
-          document.body.style.overflow = "";
-        }, 300);
-      }
-
-      function renderMedia() {
-        if (currentIndex < 0 || currentIndex >= items.length) return;
-
-        const el = items[currentIndex];
-        const type = el.dataset.mediaType || "image";
-        const url = el.dataset.fullUrl;
-        const title = decodeText(el.dataset.title || "Meme");
-        const uploader = decodeText(el.dataset.uploader || "Unknown");
-        const created = el.dataset.created || "";
-        const detailUrl = el.dataset.detailUrl || "#";
-
-        // Clear previous content
-        mediaContainer.innerHTML = "";
-        mediaContainer.classList.add("loading");
-
-        // Create media element
-        if (type === "video") {
-          const video = document.createElement("video");
-          video.controls = true;
-          video.autoplay = true;
-
-          video.addEventListener("loadeddata", () => {
-            mediaContainer.classList.remove("loading");
-            scaleMedia(video);
+          box.innerHTML = "";
+          if (!data.results?.length) return box.classList.add("d-none");
+          data.results.forEach(tag => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "btn btn-sm btn-outline-secondary m-1";
+            btn.textContent = "#" + tag.name;
+            btn.onclick = () => {
+              const url = new URL(window.location);
+              url.searchParams.set("tag", tag.slug);
+              url.searchParams.delete("page");
+              location.href = url;
+            };
+            box.appendChild(btn);
           });
+          box.classList.remove("d-none");
+        });
+    }
 
-          const source = document.createElement("source");
-          source.src = url;
-          video.appendChild(source);
-          mediaContainer.appendChild(video);
-        } else {
-          const img = new Image();
+    input.addEventListener("input", () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => fetchSuggestions(input.value.trim()), 200);
+    });
+    input.addEventListener("focus", () => !input.value.trim() && fetchSuggestions(""));
+    document.addEventListener("click", e => {
+      if (!box.contains(e.target) && e.target !== input) box.classList.add("d-none");
+    });
+  })();
 
-          img.onload = function() {
-            mediaContainer.classList.remove("loading");
-            scaleMedia(img);
-          };
+  // === Smart Lightbox ===
+  (function() {
+    const lightbox = document.getElementById("meme-lightbox");
+    const mediaContainer = document.getElementById("lightbox-media");
+    const titleEl = document.getElementById("lightbox-title");
+    const metaEl = document.getElementById("lightbox-meta");
+    const counterEl = document.getElementById("lightbox-counter");
+    const closeBtn = document.getElementById("lightbox-close");
+    const navLeft = document.getElementById("lightbox-nav-left");
+    const navRight = document.getElementById("lightbox-nav-right");
 
-          img.onerror = function() {
-            mediaContainer.classList.remove("loading");
-          };
+    let items = [];
+    let currentIndex = -1;
 
-          img.src = url;
-          img.alt = title;
-          mediaContainer.appendChild(img);
-        }
+    function collectItems() {
+      items = Array.from(document.querySelectorAll("[data-meme-open]"));
+    }
 
-        // Update info
-        titleEl.textContent = title;
+    function show() {
+      lightbox.style.display = "flex";
+      setTimeout(() => lightbox.classList.add("active"), 10);
+      document.body.style.overflow = "hidden";
+    }
+    function hide() {
+      lightbox.classList.remove("active");
+      setTimeout(() => {
+        lightbox.style.display = "none";
+        document.body.style.overflow = "";
+      }, 300);
+    }
 
-        metaEl.innerHTML = "";
-        const uploaderSpan = document.createElement("span");
-        uploaderSpan.textContent = `by ${uploader} · ${created} · `;
-        metaEl.appendChild(uploaderSpan);
+    function decodeText(t) { return t ? t.replace(/\\u[\dA-Fa-f]{4}/g, m => String.fromCharCode(parseInt(m.slice(2), 16))) : ""; }
 
-        const detailLink = document.createElement("a");
-        detailLink.href = detailUrl;
-        detailLink.textContent = "View details";
-        metaEl.appendChild(detailLink);
+    // ─── Smart Scaling (the magic) ───
+    function scaleMedia(media) {
+      media.style.width = media.style.height = media.style.maxWidth = media.style.maxHeight = "";
 
-        // Update counter
-        counterEl.textContent = `${currentIndex + 1} / ${items.length}`;
-
-        // Update navigation state
-        navLeft.style.display = currentIndex > 0 ? "flex" : "none";
-        navRight.style.display = currentIndex < items.length - 1 ? "flex" : "none";
-      }
-
-      function scaleMedia(media) {
-        // Get viewport dimensions (accounting for padding and info bar)
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight - 200; // Reserve space for info
-
-        let naturalWidth, naturalHeight;
-
+      requestAnimationFrame(() => {
+        let nw, nh;
         if (media.tagName === "VIDEO") {
-          naturalWidth = media.videoWidth;
-          naturalHeight = media.videoHeight;
+          nw = media.videoWidth;
+          nh = media.videoHeight;
+          if (!nw || !nh) return;
         } else {
-          naturalWidth = media.naturalWidth;
-          naturalHeight = media.naturalHeight;
+          nw = media.naturalWidth;
+          nh = media.naturalHeight;
+          if (!nw || !nh) return;
         }
 
-        // Calculate scaling to fill viewport while maintaining aspect ratio
-        const widthScale = (viewportWidth * 0.7) / naturalWidth;
-        const heightScale = (viewportHeight * 0.7) / naturalHeight;
+        const ar = nw / nh;
+        const vw = window.innerWidth;
+        const vh = window.innerHeight - 160;
 
-        // Use the larger scale to ensure the image fills the space
-        // but cap at 2x for very small images
-        const scale = Math.min(Math.max(widthScale, heightScale), 2);
+        const maxW = vw * 0.94;
+        const maxH = vh * 0.92;
 
-        const displayWidth = naturalWidth * scale;
-        const displayHeight = naturalHeight * scale;
+        let w, h;
 
-        media.style.width = displayWidth + "px";
-        media.style.height = displayHeight + "px";
-      }
+        if (ar > 1) {
+          // Landscape
+          w = Math.min(nw, maxW);
+          h = w / ar;
+          if (h > maxH) { h = maxH; w = h * ar; }
+        } else {
+          // Portrait → height first
+          h = Math.min(nh, maxH);
+          w = h * ar;
 
-      function openLightbox(el) {
-        collectItems();
-        currentIndex = items.indexOf(el);
-        if (currentIndex === -1) return;
-
-        showLightbox();
-        renderMedia();
-      }
-
-      function goToPrevious() {
-        if (currentIndex > 0) {
-          currentIndex--;
-          renderMedia();
-        }
-      }
-
-      function goToNext() {
-        if (currentIndex < items.length - 1) {
-          currentIndex++;
-          renderMedia();
-        }
-      }
-
-      // Event listeners
-      document.addEventListener("click", function(e) {
-        const target = e.target.closest("[data-meme-open]");
-        if (target) {
-          e.preventDefault();
-          openLightbox(target);
-        }
-      });
-
-      closeBtn.addEventListener("click", hideLightbox);
-
-      navLeft.addEventListener("click", goToPrevious);
-      navRight.addEventListener("click", goToNext);
-
-      // Keyboard navigation
-      document.addEventListener("keydown", function(e) {
-        if (!lightbox.classList.contains("active")) return;
-
-        if (e.key === "Escape") {
-          e.preventDefault();
-          hideLightbox();
-        } else if (e.key === "ArrowLeft") {
-          e.preventDefault();
-          goToPrevious();
-        } else if (e.key === "ArrowRight") {
-          e.preventDefault();
-          goToNext();
-        }
-      });
-
-      // Touch gestures
-      lightbox.addEventListener("touchstart", function(e) {
-        touchStartX = e.changedTouches[0].screenX;
-        touchStartY = e.changedTouches[0].screenY;
-      }, false);
-
-      lightbox.addEventListener("touchend", function(e) {
-        const touchEndX = e.changedTouches[0].screenX;
-        const touchEndY = e.changedTouches[0].screenY;
-
-        const deltaX = touchEndX - touchStartX;
-        const deltaY = touchEndY - touchStartY;
-
-        const minSwipeDistance = 50;
-        if (Math.abs(deltaX) > minSwipeDistance && Math.abs(deltaX) > Math.abs(deltaY)) {
-          if (deltaX > 0) {
-            goToPrevious();
-          } else {
-            goToNext();
+          // Allow moderate upscaling for very tall narrow images
+          if (w < vw * 0.5 && nh <= maxH * 1.5) {
+            const upH = maxH * 1.5;
+            const upW = upH * ar;
+            if (upW <= maxW) { h = upH; w = upW; }
           }
+          if (w > maxW) { w = maxW; h = w / ar; }
         }
-      }, false);
 
-      // Close on background click
-      lightbox.addEventListener("click", function(e) {
-        if (e.target === lightbox || e.target.closest(".lightbox-content")) {
-          hideLightbox();
-        }
-      });
+        w = Math.min(w, maxW);
+        h = Math.min(h, maxH);
 
-      // Resize handler
-      window.addEventListener("resize", function() {
-        if (lightbox.classList.contains("active")) {
-          const media = mediaContainer.querySelector("img, video");
-          if (media) {
-            scaleMedia(media);
-          }
-        }
+        media.style.transition = "width 0.35s ease, height 0.35s ease";
+        media.style.width = w + "px";
+        media.style.height = h + "px";
       });
-    })();
-  </script>
+    }
+
+    function renderMedia() {
+      if (currentIndex < 0 || currentIndex >= items.length) return;
+      const el = items[currentIndex];
+      const type = el.dataset.mediaType || "image";
+      const url = el.dataset.fullUrl;
+      const title = decodeText(el.dataset.title || "Meme");
+      const uploader = decodeText(el.dataset.uploader || "Anonymous");
+      const created = el.dataset.created || "";
+      const detailUrl = el.dataset.detailUrl || "#";
+
+      mediaContainer.innerHTML = "";
+      mediaContainer.classList.add("loading");
+
+      if (type === "video") {
+        const video = document.createElement("video");
+        video.controls = true;
+        video.autoplay = true;
+        video.muted = false;
+
+        const source = document.createElement("source");
+        source.src = url;
+        video.appendChild(source);
+        mediaContainer.appendChild(video);
+
+        const finalize = () => {
+          mediaContainer.classList.remove("loading");
+          scaleMedia(video);
+        };
+        video.addEventListener("loadeddata", finalize);
+        video.addEventListener("canplay", () => scaleMedia(video));
+      } else {
+        const img = new Image();
+        img.onload = () => {
+          mediaContainer.classList.remove("loading");
+          scaleMedia(img);
+        };
+        img.src = url;
+        img.alt = title;
+        mediaContainer.appendChild(img);
+      }
+
+      titleEl.textContent = title;
+      metaEl.innerHTML = `by ${uploader} · ${created} · <a href="${detailUrl}">View details</a>`;
+      counterEl.textContent = `${currentIndex + 1} / ${items.length}`;
+
+      navLeft.style.display = currentIndex > 0 ? "flex" : "none";
+      navRight.style.display = currentIndex < items.length - 1 ? "flex" : "none";
+    }
+
+    function open(el) {
+      collectItems();
+      currentIndex = items.indexOf(el);
+      if (currentIndex === -1) return;
+      show();
+      renderMedia();
+    }
+
+    function prev() { if (currentIndex > 0) { currentIndex--; renderMedia(); } }
+    function next() { if (currentIndex < items.length - 1) { currentIndex++; renderMedia(); } }
+
+    // Events
+    document.addEventListener("click", e => {
+      const t = e.target.closest("[data-meme-open]");
+      if (t) { e.preventDefault(); open(t); }
+    });
+    closeBtn.addEventListener("click", hide);
+    navLeft.addEventListener("click", prev);
+    navRight.addEventListener("click", next);
+    lightbox.addEventListener("click", e => { if (e.target === lightbox) hide(); });
+
+    document.addEventListener("keydown", e => {
+      if (!lightbox.classList.contains("active")) return;
+      if (e.key === "Escape") hide();
+      if (e.key === "ArrowLeft") prev();
+      if (e.key === "ArrowRight") next();
+    });
+
+    // Touch swipe
+    let tx = 0;
+    lightbox.addEventListener("touchstart", e => tx = e.changedTouches[0].screenX, { passive: true });
+    lightbox.addEventListener("touchend", e => {
+      const dx = e.changedTouches[0].screenX - tx;
+      if (Math.abs(dx) > 50) dx > 0 ? prev() : next();
+    }, { passive: true });
+
+    // Resize
+    window.addEventListener("resize", () => {
+      if (lightbox.classList.contains("active")) {
+        const m = mediaContainer.querySelector("img, video");
+        if (m) scaleMedia(m);
+      }
+    });
+  })();
+</script>
 
 {% endblock %}
