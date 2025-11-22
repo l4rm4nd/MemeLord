@@ -1,3 +1,10 @@
+## [1.0.7](https://github.com/l4rm4nd/MemeLord/compare/v1.0.6...v1.0.7) (2025-11-22)
+
+
+### Bug Fixes
+
+* improve details view ([9f30f06](https://github.com/l4rm4nd/MemeLord/commit/9f30f0604b7815fa2858daff7a5da46e4eda357f))
+
 ## [1.0.6](https://github.com/l4rm4nd/MemeLord/compare/v1.0.5...v1.0.6) (2025-11-22)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * build multi-arch images ([d5cba3f](https://github.com/l4rm4nd/MemeLord/commit/d5cba3f3013843870790dd612a5d1d315e29496c))
-
-## [1.0.2](https://github.com/l4rm4nd/MemeLord/compare/v1.0.1...v1.0.2) (2025-11-19)
-
-
-### Bug Fixes
-
-* optional local ([ce60911](https://github.com/l4rm4nd/MemeLord/commit/ce60911d4e268d525c7805f28a0e32cbb59619ed))
 
