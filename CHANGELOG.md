@@ -1,3 +1,10 @@
+## [1.0.18](https://github.com/l4rm4nd/MemeLord/compare/v1.0.17...v1.0.18) (2025-12-08)
+
+
+### Bug Fixes
+
+* meme ordering (latest > oldest) ([7700b41](https://github.com/l4rm4nd/MemeLord/commit/7700b4169329f28dd42111c4f740a53719ed729f))
+
 ## [1.0.17](https://github.com/l4rm4nd/MemeLord/compare/v1.0.16...v1.0.17) (2025-12-08)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * adjust lightbox to load more images ([7874fb3](https://github.com/l4rm4nd/MemeLord/commit/7874fb3c36ab3a9471cfd5ffe7a9fe3056b04d44))
-
-## [1.0.13](https://github.com/l4rm4nd/MemeLord/compare/v1.0.12...v1.0.13) (2025-11-27)
-
-
-### Bug Fixes
-
-* media backup includes user dirs ([cc84d48](https://github.com/l4rm4nd/MemeLord/commit/cc84d4828d8cc63802b3b26342e86d9bde50ed1b))
 
