@@ -38,6 +38,7 @@ def meme_list(request):
         .select_related("uploader", "album")
         .prefetch_related("tags")
         .annotate(comment_count=Count("comments"))
+        .order_by("-created_at")
     )
 
     tag_slug = request.GET.get("tag") or ""
