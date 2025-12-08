@@ -5,7 +5,7 @@
 
 {% block content %}
 <div class="meme-toolbar-sticky d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-    <h1 class="h3 mb-0 flex-grow-0">
+    <h1 class="h3 h4-sm mb-0 flex-grow-0">
       {% if random_mode %}
         Randomized Feed
       {% else %}
@@ -13,9 +13,9 @@
       {% endif %}
     </h1>
 
-  <div class="d-flex align-items-center gap-2 flex-grow-1 justify-content-end">
+  <div class="d-flex align-items-center gap-2 flex-grow-1 justify-content-end flex-wrap">
     <!-- Tag search -->
-    <div class="position-relative" style="max-width: 260px; width: 100%;">
+    <div class="position-relative flex-grow-1" style="max-width: 260px; min-width: 150px;">
       <input type="text"
              id="tag-filter-input"
              class="form-control form-control-sm"
@@ -26,7 +26,7 @@
         </div>
     </div>
 
-    <a href="{% url 'myapp:meme_upload' %}" class="btn btn-primary btn-sm">
+    <a href="{% url 'myapp:meme_upload' %}" class="btn btn-primary btn-sm flex-shrink-0">
       Upload
     </a>
   </div>
@@ -191,8 +191,19 @@
   @media (max-width: 768px) {
     .lightbox-info { padding: 15px 20px; }
     .lightbox-title { font-size: 1rem; }
-    .lightbox-close { top: 10px; right: 10px; }
-    .lightbox-nav-left, .lightbox-nav-right { width: 25%; }
+    .lightbox-close { top: 10px; right: 10px; width: 40px; height: 40px; }
+    .lightbox-counter { font-size: 0.8rem; padding: 6px 12px; top: 10px; }
+    .lightbox-nav-left, .lightbox-nav-right { width: 20%; }
+    .lightbox-nav-left::before, .lightbox-nav-right::before { font-size: 32px; }
+    .lightbox-content { padding: 60px 10px 90px; }
+  }
+  
+  @media (max-width: 576px) {
+    .h4-sm { font-size: 1.25rem !important; }
+    .lightbox-info { padding: 12px 15px; }
+    .lightbox-title { font-size: 0.9rem; }
+    .lightbox-meta { font-size: 0.75rem; }
+    .lightbox-nav-left, .lightbox-nav-right { width: 15%; }
   }
 
   .lightbox-tags {
@@ -219,6 +230,13 @@
   color: #9ec5fe;
   text-decoration: none;
   transform: translateY(-1px);
+}
+
+@media (max-width: 576px) {
+  .lightbox-tag-badge {
+    font-size: 0.75rem;
+    padding: 3px 8px;
+  }
 }
 </style>
 

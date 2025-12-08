@@ -30,6 +30,9 @@ from django.db.models import Count
 from django.core.paginator import Paginator
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_GET
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 @login_required
 def meme_list(request):
@@ -370,3 +373,119 @@ def meme_add_comment(request, pk):
             "num_pages": paginator.num_pages,
         }
     )
+
+@login_required
+@require_GET
+def meme_statistics(request):
+    """
+    Display comprehensive statistics about uploaded memes.
+    Optimized for large datasets.
+    """
+    from django.db.models import Avg
+    from datetime import timedelta
+    
+    # Total counts - single queries each
+    total_memes = Media.objects.count()
+    total_users = User.objects.filter(media_items__isnull=False).distinct().count()
+    total_comments = Comment.objects.count()
+    total_tags = Tag.objects.count()
+    
+    # Top uploaders (top 10)
+    top_uploaders = (
+        User.objects
+        .annotate(meme_count=Count('media_items'))
+        .filter(meme_count__gt=0)
+        .order_by('-meme_count')[:10]
+    )
+    
+    # Top commenters (top 10)
+    top_commenters = (
+        User.objects
+        .annotate(comment_count=Count('media_comments'))
+        .filter(comment_count__gt=0)
+        .order_by('-comment_count')[:10]
+    )
+    
+    # Most commented memes (top 10)
+    most_commented = (
+        Media.objects
+        .annotate(comment_count=Count('comments'))
+        .filter(comment_count__gt=0)
+        .select_related('uploader')
+        .order_by('-comment_count')[:10]
+    )
+    
+    # Most tagged memes (top 10)
+    most_tagged = (
+        Media.objects
+        .annotate(tag_count=Count('tags'))
+        .filter(tag_count__gt=0)
+        .select_related('uploader')
+        .order_by('-tag_count')[:10]
+    )
+    
+    # Popular tags (top 15)
+    popular_tags = (
+        Tag.objects
+        .annotate(usage_count=Count('media_items'))
+        .filter(usage_count__gt=0)
+        .order_by('-usage_count')[:15]
+    )
+    
+    # File type statistics - OPTIMIZED: use database aggregation
+    # Use values() to only fetch file names, not entire objects
+    file_type_stats = {}
+    media_files = Media.objects.values_list('file', flat=True)
+    
+    for file_name in media_files:
+        if file_name:
+            ext = os.path.splitext(file_name)[1].lower()
+            if ext:
+                file_type_stats[ext] = file_type_stats.get(ext, 0) + 1
+    
+    # Sort by count descending
+    file_type_stats = dict(sorted(file_type_stats.items(), key=lambda x: x[1], reverse=True))
+    
+    # Media type breakdown (image vs video)
+    media_type_stats = (
+        Media.objects
+        .values('media_type')
+        .annotate(count=Count('id'))
+        .order_by('-count')
+    )
+    
+    # Recent activity (last 7 days)
+    last_week = timezone.now() - timedelta(days=7)
+    memes_last_week = Media.objects.filter(created_at__gte=last_week).count()
+    comments_last_week = Comment.objects.filter(created_at__gte=last_week).count()
+    
+    # Average stats - OPTIMIZED: use proper aggregation
+    avg_comments_per_meme = total_comments / total_memes if total_memes > 0 else 0
+    
+    # Calculate average tags per meme efficiently
+    avg_tags_result = Media.objects.annotate(
+        tag_count=Count('tags')
+    ).aggregate(
+        avg_tags=Avg('tag_count')
+    )
+    avg_tags_per_meme = avg_tags_result['avg_tags'] or 0
+    
+    context = {
+        'total_memes': total_memes,
+        'total_users': total_users,
+        'total_comments': total_comments,
+        'total_tags': total_tags,
+        'top_uploaders': top_uploaders,
+        'top_commenters': top_commenters,
+        'most_commented': most_commented,
+        'most_tagged': most_tagged,
+        'popular_tags': popular_tags,
+        'file_type_stats': file_type_stats,
+        'media_type_stats': media_type_stats,
+        'memes_last_week': memes_last_week,
+        'comments_last_week': comments_last_week,
+        'avg_comments_per_meme': round(avg_comments_per_meme, 2),
+        'avg_tags_per_meme': round(avg_tags_per_meme, 2),
+    }
+    
+    return render(request, 'myapp/statistics.html', context)

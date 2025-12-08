@@ -19,6 +19,7 @@ urlpatterns = [
     path("memes/", views.meme_list, name="meme_list"),
     path("memes/upload/", views.meme_upload, name="meme_upload"),
     path("memes/random/", views.meme_random, name="meme_random"),
+    path("memes/statistics/", views.meme_statistics, name="meme_statistics"),
     path("memes/<int:pk>/", views.meme_detail, name="meme_detail"),
     path("memes/<int:pk>/delete/", views.meme_delete, name="meme_delete"),
     path("memes/comments/<int:pk>/delete/", views.comment_delete, name="comment_delete"),

@@ -202,6 +202,56 @@
     .action-btn {
       flex: 1;
       justify-content: center;
+      min-width: 0;
+    }
+    
+    .media-viewer {
+      padding: 15px;
+      min-height: 300px;
+    }
+    
+    .detail-title h1 {
+      font-size: 1.5rem;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .detail-title h1 {
+      font-size: 1.25rem;
+    }
+    
+    .detail-meta {
+      font-size: 0.85rem;
+      gap: 8px;
+    }
+    
+    .media-viewer {
+      padding: 10px;
+      min-height: 250px;
+    }
+    
+    .media-viewer img,
+    .media-viewer video {
+      max-height: 60vh;
+    }
+    
+    .action-btn {
+      font-size: 0.85rem;
+      padding: 6px 12px;
+    }
+    
+    .tag-badge {
+      font-size: 0.8rem;
+      padding: 5px 10px;
+    }
+    
+    .comment-form-card {
+      padding: 15px;
+    }
+    
+    .tags-container {
+      gap: 6px;
+      padding: 12px 0;
     }
   }
 </style>

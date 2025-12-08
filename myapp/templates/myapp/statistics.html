@@ -1,0 +1,324 @@
+{% extends "myapp/base.html" %}
+{% load static %}
+
+{% block title %}Statistics - MemeLord{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="h2 mb-3">📊 MemeLord Statistics</h1>
+    <p class="text-muted">Comprehensive insights into your collection</p>
+</div>
+
+<!-- Overview Cards -->
+<div class="row g-4 mb-5">
+    <div class="col-sm-6 col-lg-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <div class="display-4 mb-2">🖼️</div>
+                <h3 class="h1 mb-0">{{ total_memes }}</h3>
+                <p class="text-muted mb-0">Total Memes</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <div class="display-4 mb-2">👥</div>
+                <h3 class="h1 mb-0">{{ total_users }}</h3>
+                <p class="text-muted mb-0">Active Users</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <div class="display-4 mb-2">💬</div>
+                <h3 class="h1 mb-0">{{ total_comments }}</h3>
+                <p class="text-muted mb-0">Total Comments</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <div class="display-4 mb-2">🏷️</div>
+                <h3 class="h1 mb-0">{{ total_tags }}</h3>
+                <p class="text-muted mb-0">Unique Tags</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row g-4 mb-5">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">📈 Last 7 Days</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span>New Memes</span>
+                    <span class="badge bg-primary fs-6">{{ memes_last_week }}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>New Comments</span>
+                    <span class="badge bg-info fs-6">{{ comments_last_week }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">📊 Averages</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span>Comments per Meme</span>
+                    <span class="badge bg-success fs-6">{{ avg_comments_per_meme }}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>Tags per Meme</span>
+                    <span class="badge bg-warning text-dark fs-6">{{ avg_tags_per_meme }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Top Uploaders & Commenters -->
+<div class="row g-4 mb-5">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">🏆 Top Uploaders</h5>
+            </div>
+            <div class="card-body">
+                {% if top_uploaders %}
+                    <div class="list-group list-group-flush">
+                        {% for user in top_uploaders %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-primary rounded-pill">{{ forloop.counter }}</span>
+                                    <span>{{ user.username }}</span>
+                                </div>
+                                <span class="badge bg-secondary rounded-pill">{{ user.meme_count }} memes</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">No data available</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">💬 Top Commenters</h5>
+            </div>
+            <div class="card-body">
+                {% if top_commenters %}
+                    <div class="list-group list-group-flush">
+                        {% for user in top_commenters %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-info rounded-pill">{{ forloop.counter }}</span>
+                                    <span>{{ user.username }}</span>
+                                </div>
+                                <span class="badge bg-secondary rounded-pill">{{ user.comment_count }} comments</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">No data available</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Most Commented & Most Tagged -->
+<div class="row g-4 mb-5">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">🔥 Most Commented Memes</h5>
+            </div>
+            <div class="card-body">
+                {% if most_commented %}
+                    <div class="list-group list-group-flush">
+                        {% for meme in most_commented %}
+                            <a href="{% url 'myapp:meme_detail' meme.pk %}" 
+                               class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-0">
+                                <div class="text-truncate me-2">
+                                    <span class="badge bg-primary me-2">{{ forloop.counter }}</span>
+                                    {{ meme.title|default:"Untitled" }}
+                                    <small class="text-muted d-block">{{ meme.created_at|date:"Y-m-d H:i" }} · by {{ meme.uploader.username }}</small>
+                                </div>
+                                <span class="badge bg-secondary rounded-pill flex-shrink-0">{{ meme.comment_count }}</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">No commented memes yet</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">🏷️ Most Tagged Memes</h5>
+            </div>
+            <div class="card-body">
+                {% if most_tagged %}
+                    <div class="list-group list-group-flush">
+                        {% for meme in most_tagged %}
+                            <a href="{% url 'myapp:meme_detail' meme.pk %}" 
+                               class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-0">
+                                <div class="text-truncate">
+                                    <span class="badge bg-warning text-dark me-2">{{ forloop.counter }}</span>
+                                    {{ meme.title|default:"Untitled" }}
+                                    <small class="text-muted d-block">{{ meme.created_at|date:"Y-m-d H:i" }} · by {{ meme.uploader.username }}</small>
+                                </div>
+                                <span class="badge bg-secondary rounded-pill flex-shrink-0">{{ meme.tag_count }} tags</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">No tagged memes yet</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Popular Tags -->
+<div class="row g-4 mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">🌟 Popular Tags</h5>
+            </div>
+            <div class="card-body">
+                {% if popular_tags %}
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for tag in popular_tags %}
+                            <a href="{% url 'myapp:meme_list' %}?tag={{ tag.slug }}" 
+                               class="btn btn-outline-primary btn-sm">
+                                #{{ tag.name }}
+                                <span class="badge bg-primary ms-1">{{ tag.usage_count }}</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">No tags yet</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- File Type & Media Type Statistics -->
+<div class="row g-4 mb-5">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">📁 File Type Distribution</h5>
+            </div>
+            <div class="card-body">
+                {% if file_type_stats %}
+                    <div class="list-group list-group-flush">
+                        {% for ext, count in file_type_stats.items %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <span class="font-monospace">{{ ext }}</span>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="progress" style="width: 100px; height: 20px;">
+                                        <div class="progress-bar" role="progressbar" 
+                                             style="width: {{ count|floatformat:0|add:'0'|divisibleby:total_memes|yesno:'100,0' }}%"
+                                             aria-valuenow="{{ count }}" aria-valuemin="0" aria-valuemax="{{ total_memes }}">
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-secondary">{{ count }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">No file type data</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">🎬 Media Type Distribution</h5>
+            </div>
+            <div class="card-body">
+                {% if media_type_stats %}
+                    <div class="list-group list-group-flush">
+                        {% for item in media_type_stats %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <div class="d-flex align-items-center gap-2">
+                                    {% if item.media_type == 'image' %}
+                                        <span class="fs-4">🖼️</span>
+                                    {% elif item.media_type == 'video' %}
+                                        <span class="fs-4">🎥</span>
+                                    {% else %}
+                                        <span class="fs-4">📄</span>
+                                    {% endif %}
+                                    <span class="text-capitalize">{{ item.media_type|default:"Unknown" }}</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="progress" style="width: 100px; height: 20px;">
+                                        <div class="progress-bar bg-success" role="progressbar" 
+                                             style="width: {% widthratio item.count total_memes 100 %}%"
+                                             aria-valuenow="{{ item.count }}" aria-valuemin="0" aria-valuemax="{{ total_memes }}">
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-success">{{ item.count }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">No media type data</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Back to Feed Button -->
+<div class="text-center mb-4">
+    <a href="{% url 'myapp:meme_list' %}" class="btn btn-primary">
+        ← Back to Feed
+    </a>
+</div>
+
+<style>
+    .card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    html[data-bs-theme="dark"] .card:hover {
+        box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+    }
+    
+    .progress {
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+    
+    html[data-bs-theme="dark"] .progress {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+</style>
+{% endblock %}

@@ -1,6 +1,7 @@
 import os
 import re
 from django import forms
+from django.conf import settings
 from .models import *
 
 
@@ -84,25 +85,34 @@ class MediaUploadForm(forms.ModelForm):
         content_type = getattr(f, "content_type", "") or ""
         ext = os.path.splitext(f.name)[1].lower()
 
-        # 1) Validate extension whitelist
+        # 1) Validate file size
+        max_size = getattr(settings, 'MAX_UPLOAD_SIZE_MB', 10 * 1024 * 1024)  # Default 10MB
+        if f.size > max_size:
+            max_size_mb = max_size / (1024 * 1024)
+            file_size_mb = f.size / (1024 * 1024)
+            raise forms.ValidationError(
+                f"File size ({file_size_mb:.2f} MB) exceeds the maximum allowed size of {max_size_mb:.0f} MB."
+            )
+
+        # 2) Validate extension whitelist
         if ext not in ALLOWED_EXTS:
             raise forms.ValidationError(
                 f"File type not allowed. Allowed extensions: {', '.join(sorted(ALLOWED_EXTS))}"
             )
 
-        # 2) Validate MIME whitelist
+        # 3) Validate MIME whitelist
         if content_type not in ALLOWED_MIME_TYPES:
             raise forms.ValidationError(
                 "Invalid or unsafe file type (blocked MIME type)."
             )
 
-        # 3) Validate magic bytes
+        # 4) Validate magic bytes
         if not validate_magic_header(f, ext):
             raise forms.ValidationError(
                 "File signature does not match its extension. Upload rejected."
             )
 
-        # 4) Set media type for model
+        # 5) Set media type for model
         if content_type.startswith("image/"):
             self.cleaned_data["media_type"] = Media.MediaType.IMAGE
         else:

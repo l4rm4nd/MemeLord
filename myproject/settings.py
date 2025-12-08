@@ -237,6 +237,10 @@ OIDC_AUTOLOGIN = os.environ.get('OIDC_AUTOLOGIN', 'False').lower() in ['true']
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+# Max file upload size in MB (default: 10MB)
+# Can be configured via MAX_UPLOAD_SIZE_MB environment variable
+MAX_UPLOAD_SIZE_MB = int(os.environ.get('MAX_UPLOAD_SIZE_MB', '10')) * 1024 * 1024
+
 if OIDC_ENABLED:
     # get oidc config from env
     OIDC_CREATE_USER = os.environ.get('OIDC_CREATE_USER', 'True').lower() in ['true']
