@@ -1,6 +1,9 @@
 from django.conf import settings
 from django.db import models
 from django.utils.text import slugify
+import logging
+
+logger = logging.getLogger(__name__)
 
 User = settings.AUTH_USER_MODEL
 
@@ -32,7 +35,9 @@ class Tag(TimeStampedModel):
 
 def meme_upload_to(instance, filename: str) -> str:
     # user based folder – keeps things tidy
-    return f"memes/user_{instance.uploader_id}/{filename}"
+    path = f"memes/user_{instance.uploader_id}/{filename}"
+    logger.debug(f"Generating upload path: {path}")
+    return path
 
 
 class Album(TimeStampedModel):
@@ -94,20 +99,50 @@ class Media(TimeStampedModel):
 
     def __str__(self):
         return self.title or f"Meme #{self.pk}"
+    
+    def save(self, *args, **kwargs):
+        """
+        Override save to add logging for storage operations.
+        """
+        storage_backend = getattr(settings, 'STORAGE_BACKEND', 'local')
+        
+        if self.file:
+            logger.debug(f"Saving media file: {self.file.name} using storage backend: {storage_backend}")
+            logger.debug(f"Storage class: {self.file.storage.__class__.__name__}")
+            logger.debug(f"File size: {self.file.size} bytes")
+            
+            if storage_backend == 's3':
+                logger.debug(f"S3 Bucket: {getattr(settings, 'AWS_STORAGE_BUCKET_NAME', 'NOT SET')}")
+                logger.debug(f"S3 Region: {getattr(settings, 'AWS_S3_REGION_NAME', 'NOT SET')}")
+                logger.debug(f"S3 Endpoint: {getattr(settings, 'AWS_S3_ENDPOINT_URL', 'DEFAULT')}")
+                logger.debug(f"AWS Location: {getattr(settings, 'AWS_LOCATION', 'NOT SET')}")
+        
+        super().save(*args, **kwargs)
+        
+        if self.file:
+            logger.debug(f"Media file saved successfully: {self.file.name}")
+            logger.debug(f"File URL: {self.file.url}")
 
     def delete(self, *args, **kwargs):
         """
-        Ensure the file is removed from disk when the Media object is deleted.
+        Ensure the file is removed from storage when the Media object is deleted.
         """
         storage = self.file.storage
         path = self.file.name
+        
+        logger.debug(f"Deleting media file: {path}")
+        logger.debug(f"Storage backend: {getattr(settings, 'STORAGE_BACKEND', 'local')}")
 
         # First delete the DB record
         super().delete(*args, **kwargs)
 
         # Then delete the actual file
         if path:
-            storage.delete(path)
+            try:
+                storage.delete(path)
+                logger.debug(f"Successfully deleted file from storage: {path}")
+            except Exception as e:
+                logger.error(f"Error deleting file from storage: {path}. Error: {str(e)}")
 
 class Comment(TimeStampedModel):
     media = models.ForeignKey(
