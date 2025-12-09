@@ -14,6 +14,8 @@ services:
       - SESSION_EXPIRE_AT_BROWSER_CLOSE=False
       # define the timezone
       - TZ=Europe/Berlin
+      # define max upload size
+      #- MAX_UPLOAD_SIZE_MB=10
       # define comma-separated list of sources for csp frame-ancestors directive
       #- CSP_FRAME_ANCESTORS="'self', https://iframe.example.com, https://iframe2.example.com:5432"
       # ------- OPTIONAL OIDC AUTH --------
