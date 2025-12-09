@@ -4,6 +4,8 @@ services:
     image: ghcr.io/l4rm4nd/memelord:latest # pin a minor version series tag instead of latest
     container_name: memelord
     environment:
+      # see env.example for more setup options
+      # ------------------------------------------------------------
       # your FQDN or IP; multiple ones supported by comma separation
       - DOMAIN=memelord.example.com
       # set to True if you use a reverse proxy with tls; enables secure cookie flag and hsts
@@ -14,88 +16,14 @@ services:
       - SESSION_EXPIRE_AT_BROWSER_CLOSE=False
       # define the timezone
       - TZ=Europe/Berlin
-      # set to True to enable Django debug mode (not recommended for production)
-      #- DEBUG=False
-      # define Django logging level: DEBUG, INFO, WARNING, ERROR, CRITICAL
-      #- DJANGO_LOG_LEVEL=INFO      
-      # define comma-separated list of sources for csp frame-ancestors directive
-      #- CSP_FRAME_ANCESTORS="'self', https://iframe.example.com, https://iframe2.example.com:5432"
-      # ------- OPTIONAL OIDC AUTH --------
-      # Set to 'True' to enable OIDC authentication
-      #- OIDC_ENABLED=True
-      # Decide whether login area triggers automatic OIDC login flow
-      #- OIDC_AUTOLOGIN=False
-      # Set to 'True' to allow the creation of new users through OIDC
-      #- OIDC_CREATE_USER=True
-      # The signing algorithm used by the OIDC provider (e.g., RS256, HS256)
-      #- OIDC_RP_SIGN_ALGO=RS256
-      # URL of the JWKS endpoint for the OIDC provider
-      #- OIDC_OP_JWKS_ENDPOINT=https://authentik.example.com/application/o/<slug>/jwks/
-      # Client ID for your OIDC RP
-      #- OIDC_RP_CLIENT_ID=<client-id>
-      # Client secret for your OIDC RP
-      #- OIDC_RP_CLIENT_SECRET=<client-secret>
-      # Authorization endpoint URL of the OIDC provider
-      #- OIDC_OP_AUTHORIZATION_ENDPOINT=https://authentik.example.com/application/o/authorize/
-      # Token endpoint URL of the OIDC provider
-      #- OIDC_OP_TOKEN_ENDPOINT=https://authentik.example.com/application/o/token/
-      # User info endpoint URL of the OIDC provider
-      #- OIDC_OP_USER_ENDPOINT=https://authentik.example.com/application/o/userinfo/
-      # Length of time it takes for an id token to expire in seconds	
-      #- OIDC_RENEW_ID_TOKEN_EXPIRY_SECONDS=900
-      # ------- STORAGE BACKENDS --------
-      # Storage backend: local (default), s3, azure, gcs, sftp, dropbox, ftp
-      #- STORAGE_BACKEND=local
-      # Maximum file upload size in megabytes
-      #- MAX_UPLOAD_SIZE_MB=10
-      # --- AWS S3 / S3-Compatible Storage ---
-      #- AWS_ACCESS_KEY_ID=your_access_key
-      #- AWS_SECRET_ACCESS_KEY=your_secret_key
-      #- AWS_STORAGE_BUCKET_NAME=memelord-bucket
-      #- AWS_S3_REGION_NAME=us-east-1
-      #- AWS_S3_ENDPOINT_URL=https://s3.example.com  # For MinIO, DigitalOcean Spaces, etc.
-      #- AWS_DEFAULT_ACL=private
-      #- AWS_LOCATION=media
-      # --- Microsoft Azure Blob Storage ---
-      #- AZURE_ACCOUNT_NAME=your_account
-      #- AZURE_ACCOUNT_KEY=your_key
-      #- AZURE_CONTAINER=media
-      # --- Google Cloud Storage ---
-      #- GS_BUCKET_NAME=memelord-bucket
-      #- GS_PROJECT_ID=your-project-id
-      #- GS_CREDENTIALS=/app/credentials.json
-      # --- SFTP Storage ---
-      #- SFTP_STORAGE_HOST=sftp.example.com
-      #- SFTP_STORAGE_USERNAME=user
-      #- SFTP_STORAGE_PASSWORD=password
-      #- SFTP_STORAGE_PORT=22
-      # --- Dropbox Storage ---
-      #- DROPBOX_OAUTH2_TOKEN=your_token
-      # --- FTP Storage ---
-      #- FTP_STORAGE_LOCATION=ftp://user:pass@host:21/path
-      # ------- REDIS SESSIONS --------
-      # Redis for session storage and caching (enables horizontal scaling)
-      #- REDIS_HOST=redis
-      #- REDIS_PORT=6379
-      #- REDIS_DB=0
-      #- REDIS_PASSWORD=
-      # ------- PSQL DB ENVS --------
-      #- DB_ENGINE=postgres
-      #- POSTGRES_USER=memelord
-      #- POSTGRES_PASSWORD=memelord
-      #- POSTGRES_DB=memelord
-      #- POSTGRES_HOST=db
-      #- POSTGRES_PORT=5432
     restart: unless-stopped
     expose:
       - 8000
     ports:
       - 8000:8000
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
       - ./volume-data/database:/opt/app/database # persistent storage for sqlite3 database
-      - ./volume-data/media:/opt/app/media # persistent storage for uploaded media
+      - ./volume-data/media:/opt/app/media # persistent storage for uploaded media    
     #networks:
     #  - proxy
     #  - internal
