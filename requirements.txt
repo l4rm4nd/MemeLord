@@ -14,12 +14,15 @@ django-csp==4.0
 celery[redis]
 django-celery-beat==2.8.1
 
+# CACHE
+django-redis==6.0.0
+
 # OIDC
 mozilla-django-oidc==4.0.1
 josepy==1.5.0
 
 # STORAGE
-django-storages==1.14.4
+django-storages==1.14.6
 boto3==1.42.5
 azure-storage-blob==12.27.1
 google-cloud-storage==3.6.0

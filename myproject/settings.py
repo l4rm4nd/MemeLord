@@ -61,6 +61,48 @@ SESSION_COOKIE_AGE = int(os.environ.get('SESSION_COOKIE_AGE', '30')) * 60
 SESSION_COOKIE_NAME = 'Session'
 SESSION_COOKIE_SAMESITE = 'Lax'
 
+# =============================================================================
+# REDIS CACHE CONFIGURATION (for sessions and general caching)
+# =============================================================================
+# Configure Redis for cloud-native deployments
+# If REDIS_HOST is not set, sessions will use database (backward compatible)
+REDIS_HOST = os.environ.get("REDIS_HOST", "")
+REDIS_PORT = os.environ.get("REDIS_PORT", "6379")
+REDIS_DB = os.environ.get("REDIS_DB", "0")
+REDIS_PASSWORD = os.environ.get("REDIS_PASSWORD", "")
+
+if REDIS_HOST:
+    # Redis is available - use it for caching and sessions
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}",
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                "PASSWORD": REDIS_PASSWORD if REDIS_PASSWORD else None,
+                "SOCKET_CONNECT_TIMEOUT": 5,  # seconds
+                "SOCKET_TIMEOUT": 5,  # seconds
+                "RETRY_ON_TIMEOUT": True,
+                "CONNECTION_POOL_KWARGS": {
+                    "max_connections": 50,
+                    "retry_on_timeout": True,
+                },
+                "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
+                "IGNORE_EXCEPTIONS": True,  # Don't crash if Redis is down
+            },
+            "KEY_PREFIX": "memelord",
+            "TIMEOUT": 300,  # 5 minutes default
+        }
+    }
+    
+    # Use Redis for session storage (cloud-native)
+    SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+    SESSION_CACHE_ALIAS = "default"
+else:
+    # Redis not configured - use database sessions (backward compatible)
+    SESSION_ENGINE = "django.contrib.sessions.backends.db"
+    # No CACHES configuration - Django will use local memory cache
+
 SECURE_COOKIES = os.environ.get('SECURE_COOKIES', 'False').lower() in ['true']
 
 if SECURE_COOKIES:

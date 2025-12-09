@@ -361,32 +361,156 @@ aws s3 sync ./media/ s3://your-bucket-name/media/ --acl private
 
 ## Troubleshooting
 
-### S3 Connection Issues:
-- Verify your credentials are correct
-- Check bucket permissions and IAM policies
-- Ensure the bucket exists and is in the correct region
-- For S3-compatible services, make sure `AWS_S3_ENDPOINT_URL` is set correctly
+---
 
-### Azure Connection Issues:
-- Verify account name and key are correct
-- Check that the container exists
-- Ensure your storage account allows the necessary access
+## Redis Cache & Sessions (Cloud-Native)
 
-### GCS Connection Issues:
-- Verify the credentials JSON file path is correct and accessible
-- Check that the service account has Storage Object Admin permissions
-- Ensure the bucket exists in the specified project
+For cloud-native deployments with horizontal scaling, you can configure Redis for session storage and general caching. This ensures sessions work across all application instances.
 
-### SFTP Connection Issues:
-- Verify SSH credentials and host
-- Check firewall rules and SSH port accessibility
-- Ensure the root path exists and has proper permissions
+### Why Use Redis for Sessions?
 
-### Performance Considerations:
-- Cloud storage may have higher latency than local storage
-- Consider using CDN (CloudFront, Azure CDN, etc.) for better performance
-- Enable caching where appropriate
-- For high-traffic applications, consider using signed URLs with expiration
+**Benefits:**
+- ✅ **Horizontal Scaling** - Sessions work across multiple app instances/containers
+- ✅ **Fast Performance** - Redis is in-memory, much faster than database queries
+- ✅ **Load Balancer Friendly** - Users stay logged in when routed to different servers
+- ✅ **Automatic Expiration** - Redis handles session cleanup automatically
+- ✅ **Cloud Native** - Works perfectly with Kubernetes, Docker Swarm, ECS, etc.
+
+### Configuration
+
+#### Required Environment Variables:
+```bash
+REDIS_HOST=redis.example.com        # Redis server hostname
+```
+
+#### Optional Environment Variables:
+```bash
+REDIS_PORT=6379                      # Default: 6379
+REDIS_DB=0                           # Default: 0
+REDIS_PASSWORD=your_password         # Optional: Redis password
+```
+
+### Example Configurations
+
+#### Development (Local Redis):
+```bash
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_DB=0
+```
+
+#### Production (AWS ElastiCache):
+```bash
+REDIS_HOST=memelord.abc123.0001.use1.cache.amazonaws.com
+REDIS_PORT=6379
+REDIS_DB=0
+REDIS_PASSWORD=
+```
+
+#### Production (Azure Cache for Redis):
+```bash
+REDIS_HOST=memelord.redis.cache.windows.net
+REDIS_PORT=6380
+REDIS_DB=0
+REDIS_PASSWORD=your_access_key
+```
+
+#### Production (Google Cloud Memorystore):
+```bash
+REDIS_HOST=10.0.0.3
+REDIS_PORT=6379
+REDIS_DB=0
+```
+
+#### Docker Compose Example:
+```yaml
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+  web:
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+
+volumes:
+  redis_data:
+```
+
+### Behavior
+
+**When `REDIS_HOST` is set:**
+- Sessions are stored in Redis
+- Fast session lookups (in-memory)
+- Sessions persist across app restarts (if Redis persistence enabled)
+- General caching uses Redis (with 5-minute default timeout)
+
+**When `REDIS_HOST` is not set (default):**
+- Sessions are stored in the database (backward compatible)
+- No Redis connection required
+- Works for single-instance deployments
+
+### Testing Redis Connection
+
+```bash
+# Test Redis connectivity
+redis-cli -h <REDIS_HOST> -p <REDIS_PORT> ping
+
+# Should return: PONG
+
+# View Redis session keys
+redis-cli -h <REDIS_HOST> -p <REDIS_PORT>
+> KEYS memelord:*
+```
+
+### Cache Configuration Details
+
+The Redis cache is configured with:
+- **Key Prefix**: `memelord` - Prevents key collisions with other apps
+- **Timeout**: 300 seconds (5 minutes) default
+- **Compression**: zlib compression for data efficiency
+- **Connection Pool**: Max 50 connections, with retry on timeout
+- **Graceful Degradation**: `IGNORE_EXCEPTIONS=True` - App continues if Redis is down
+
+### Performance Tips
+
+1. **Use Redis for Sessions in Production** - Database sessions don't scale well
+2. **Enable Redis Persistence** - Use AOF or RDB to prevent session loss on Redis restart
+3. **Monitor Redis Memory** - Set `maxmemory` and `maxmemory-policy` in Redis config
+4. **Use Connection Pooling** - Already configured (50 max connections)
+5. **Consider Redis Cluster** - For very high-traffic deployments
+
+### Troubleshooting Redis Sessions
+
+**Problem:** Users getting logged out randomly
+
+**Causes:**
+- Redis server restarted without persistence
+- Redis memory full (evicting keys)
+- Network connectivity issues
+
+**Solutions:**
+- Enable Redis AOF persistence: `redis-server --appendonly yes`
+- Set appropriate `maxmemory-policy`: `allkeys-lru` or `volatile-lru`
+- Monitor Redis with CloudWatch/Prometheus
+
+**Problem:** Sessions not working after deployment
+
+**Check:**
+1. Redis host is accessible from app containers
+2. Firewall rules allow Redis port (6379)
+3. Redis password is correct (if set)
+4. Test connection: `redis-cli -h $REDIS_HOST ping`
+
+---
+
+## Troubleshooting
 
 ---
 
