@@ -1,3 +1,11 @@
+## [1.2.0](https://github.com/l4rm4nd/MemeLord/compare/v1.1.0...v1.2.0) (2025-12-09)
+
+
+### Features
+
+* optional redis session cache ([00cd568](https://github.com/l4rm4nd/MemeLord/commit/00cd568fbcdc84322bbe17fe8ef572720ad0e7cc))
+* support for s3 and more storage providers ([a436e61](https://github.com/l4rm4nd/MemeLord/commit/a436e61f7698fb5010821bf5e3cb58406fea14a5))
+
 ## [1.1.0](https://github.com/l4rm4nd/MemeLord/compare/v1.0.18...v1.1.0) (2025-12-08)
 
 
@@ -25,11 +33,4 @@
 ### Bug Fixes
 
 * display tags on lightdm and improve tag adding ([add3f64](https://github.com/l4rm4nd/MemeLord/commit/add3f6457b4a46fb1331ee705485d86f7c64cdb7))
-
-## [1.0.15](https://github.com/l4rm4nd/MemeLord/compare/v1.0.14...v1.0.15) (2025-12-04)
-
-
-### Bug Fixes
-
-* bump django ([340dea2](https://github.com/l4rm4nd/MemeLord/commit/340dea29be10fcfbd005281ca996c720b339e50f))
 
