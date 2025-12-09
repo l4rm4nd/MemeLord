@@ -27,7 +27,8 @@
 - Media files stored on disk for easy backup and direct access
 - Infinite scroll feed with pagination fallback
 - Admin view with thumbnails, uploader info and tags
-- Support for SQLite3 and PostgreSQL
+- Support for SQLite3 and PostgreSQL as database
+- Support for various storage providers (local, S3, Dropbox, FTP, SSH)
 
 ## 🔥 Installation
 
