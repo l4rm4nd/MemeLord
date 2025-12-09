@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/l4rm4nd/MemeLord/compare/v1.2.0...v1.2.1) (2025-12-09)
+
+
+### Bug Fixes
+
+* adjust backup logic to support new storage providers ([99546b6](https://github.com/l4rm4nd/MemeLord/commit/99546b66769a9ac7a21b6cd9d73b1e0ebc6515fe))
+
 ## [1.2.0](https://github.com/l4rm4nd/MemeLord/compare/v1.1.0...v1.2.0) (2025-12-09)
 
 
@@ -26,11 +33,4 @@
 ### Bug Fixes
 
 * properly construct tags with js ([b0e85c8](https://github.com/l4rm4nd/MemeLord/commit/b0e85c82cc673b38f08b4184bb22be25e2cea632))
-
-## [1.0.16](https://github.com/l4rm4nd/MemeLord/compare/v1.0.15...v1.0.16) (2025-12-08)
-
-
-### Bug Fixes
-
-* display tags on lightdm and improve tag adding ([add3f64](https://github.com/l4rm4nd/MemeLord/commit/add3f6457b4a46fb1331ee705485d86f7c64cdb7))
 
