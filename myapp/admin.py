@@ -145,7 +145,14 @@ class MediaAdmin(admin.ModelAdmin):
         """
         Create a ZIP file containing all selected media files plus a JSON metadata file.
         Preserves the original folder structure so files can be extracted directly to MEDIA_ROOT.
+        Works with all storage backends (local, S3, Azure, GCS, SFTP, Dropbox, FTP).
         """
+        from django.conf import settings
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        storage_backend = getattr(settings, 'STORAGE_BACKEND', 'local')
+        
         # Create an in-memory ZIP file
         zip_buffer = BytesIO()
         
@@ -158,19 +165,24 @@ class MediaAdmin(admin.ModelAdmin):
                     continue
                 
                 try:
-                    # Get the file path on disk
-                    file_path = media.file.path
-                    
                     # Use the same path structure as stored in the database
                     # e.g., "memes/user_1/filename.jpg"
                     zip_filename = media.file.name
                     
-                    # Add file to ZIP with original path structure
-                    zip_file.write(file_path, zip_filename)
+                    # Read file content from storage (works for all backends)
+                    # This opens the file from whatever storage backend is configured
+                    with media.file.storage.open(media.file.name, 'rb') as file_obj:
+                        file_content = file_obj.read()
+                    
+                    # Add file content to ZIP with original path structure
+                    zip_file.writestr(zip_filename, file_content)
                     files_added += 1
+                    
+                    logger.debug(f"Added {zip_filename} to ZIP from {storage_backend} storage")
                     
                 except Exception as e:
                     # Log error but continue with other files
+                    logger.error(f"Error adding {media.title or media.id} to ZIP: {str(e)}")
                     self.message_user(
                         request,
                         f"Error adding {media.title or media.id}: {str(e)}",
@@ -202,7 +214,7 @@ class MediaAdmin(admin.ModelAdmin):
         
         self.message_user(
             request,
-            f"Successfully created ZIP with {files_added} file(s) and metadata.json.",
+            f"Successfully created ZIP with {files_added} file(s) and metadata.json from {storage_backend} storage.",
             level=messages.SUCCESS
         )
         
