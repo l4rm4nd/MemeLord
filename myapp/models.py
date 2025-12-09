@@ -107,7 +107,7 @@ class Media(TimeStampedModel):
         storage_backend = getattr(settings, 'STORAGE_BACKEND', 'local')
         
         if self.file:
-            logger.info(f"Saving media file: {self.file.name} using storage backend: {storage_backend}")
+            logger.debug(f"Saving media file: {self.file.name} using storage backend: {storage_backend}")
             logger.debug(f"Storage class: {self.file.storage.__class__.__name__}")
             logger.debug(f"File size: {self.file.size} bytes")
             
@@ -120,7 +120,7 @@ class Media(TimeStampedModel):
         super().save(*args, **kwargs)
         
         if self.file:
-            logger.info(f"Media file saved successfully: {self.file.name}")
+            logger.debug(f"Media file saved successfully: {self.file.name}")
             logger.debug(f"File URL: {self.file.url}")
 
     def delete(self, *args, **kwargs):
@@ -130,7 +130,7 @@ class Media(TimeStampedModel):
         storage = self.file.storage
         path = self.file.name
         
-        logger.info(f"Deleting media file: {path}")
+        logger.debug(f"Deleting media file: {path}")
         logger.debug(f"Storage backend: {getattr(settings, 'STORAGE_BACKEND', 'local')}")
 
         # First delete the DB record
@@ -140,7 +140,7 @@ class Media(TimeStampedModel):
         if path:
             try:
                 storage.delete(path)
-                logger.info(f"Successfully deleted file from storage: {path}")
+                logger.debug(f"Successfully deleted file from storage: {path}")
             except Exception as e:
                 logger.error(f"Error deleting file from storage: {path}. Error: {str(e)}")
 

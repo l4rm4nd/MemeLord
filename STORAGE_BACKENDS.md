@@ -239,7 +239,7 @@ python manage.py test_storage
 This command will:
 - Display your current storage backend configuration
 - Show all relevant environment variables
-- Test file upload, retrieval, and optionally deletion
+- Test file upload, retrieval, and deletion
 - Verify the storage backend is working correctly
 - Display any errors with detailed tracebacks
 

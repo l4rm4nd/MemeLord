@@ -15,6 +15,15 @@ logger = logging.getLogger(__name__)
 class Command(BaseCommand):
     help = 'Test storage backend configuration and connectivity'
 
+    def mask_secret(self, value, visible_chars=4):
+        """Mask sensitive values, showing only the first few and last few characters."""
+        if not value:
+            return 'NOT SET'
+        value_str = str(value)
+        if len(value_str) <= visible_chars * 2:
+            return '*' * len(value_str)
+        return f"{value_str[:visible_chars]}{'*' * (len(value_str) - visible_chars * 2)}{value_str[-visible_chars:]}"
+
     def handle(self, *args, **options):
         # Temporarily suppress verbose logging from boto3/botocore/storages unless DEBUG=True
         debug_mode = settings.DEBUG
@@ -37,8 +46,8 @@ class Command(BaseCommand):
         
         if storage_backend == 's3':
             self.stdout.write(self.style.WARNING('\n--- S3 Configuration ---'))
-            self.stdout.write(f"AWS_ACCESS_KEY_ID: {'SET' if settings.AWS_ACCESS_KEY_ID else 'NOT SET'}")
-            self.stdout.write(f"AWS_SECRET_ACCESS_KEY: {'SET' if settings.AWS_SECRET_ACCESS_KEY else 'NOT SET'}")
+            self.stdout.write(f"AWS_ACCESS_KEY_ID: {self.mask_secret(getattr(settings, 'AWS_ACCESS_KEY_ID', None))}")
+            self.stdout.write(f"AWS_SECRET_ACCESS_KEY: {self.mask_secret(getattr(settings, 'AWS_SECRET_ACCESS_KEY', None))}")
             self.stdout.write(f"AWS_STORAGE_BUCKET_NAME: {getattr(settings, 'AWS_STORAGE_BUCKET_NAME', 'NOT SET')}")
             self.stdout.write(f"AWS_S3_REGION_NAME: {getattr(settings, 'AWS_S3_REGION_NAME', 'NOT SET')}")
             self.stdout.write(f"AWS_S3_ENDPOINT_URL: {getattr(settings, 'AWS_S3_ENDPOINT_URL', 'DEFAULT (AWS)')}")
@@ -50,14 +59,18 @@ class Command(BaseCommand):
         elif storage_backend == 'azure':
             self.stdout.write(self.style.WARNING('\n--- Azure Configuration ---'))
             self.stdout.write(f"AZURE_ACCOUNT_NAME: {getattr(settings, 'AZURE_ACCOUNT_NAME', 'NOT SET')}")
-            self.stdout.write(f"AZURE_ACCOUNT_KEY: {'SET' if getattr(settings, 'AZURE_ACCOUNT_KEY', None) else 'NOT SET'}")
+            self.stdout.write(f"AZURE_ACCOUNT_KEY: {self.mask_secret(getattr(settings, 'AZURE_ACCOUNT_KEY', None))}")
             self.stdout.write(f"AZURE_CONTAINER: {getattr(settings, 'AZURE_CONTAINER', 'NOT SET')}")
         
         elif storage_backend == 'gcs':
             self.stdout.write(self.style.WARNING('\n--- GCS Configuration ---'))
             self.stdout.write(f"GS_BUCKET_NAME: {getattr(settings, 'GS_BUCKET_NAME', 'NOT SET')}")
             self.stdout.write(f"GS_PROJECT_ID: {getattr(settings, 'GS_PROJECT_ID', 'NOT SET')}")
-            self.stdout.write(f"GS_CREDENTIALS: {getattr(settings, 'GS_CREDENTIALS', 'NOT SET')}")
+            credentials = getattr(settings, 'GS_CREDENTIALS', None)
+            if credentials:
+                self.stdout.write(f"GS_CREDENTIALS: [Object - credentials configured]")
+            else:
+                self.stdout.write(f"GS_CREDENTIALS: NOT SET")
         
         elif storage_backend == 'local':
             self.stdout.write(self.style.WARNING('\n--- Local Storage Configuration ---'))
@@ -107,11 +120,11 @@ class Command(BaseCommand):
                 
                 # Delete test file
                 self.stdout.write(f"\nCleaning up test file...")
-                #default_storage.delete(saved_path)
-                #if not default_storage.exists(saved_path):
-                    #self.stdout.write(self.style.SUCCESS(f"✓ Test file deleted successfully"))
-                #else:
-                    #self.stdout.write(self.style.ERROR(f"✗ Test file still exists after deletion"))
+                default_storage.delete(saved_path)
+                if not default_storage.exists(saved_path):
+                    self.stdout.write(self.style.SUCCESS(f"✓ Test file deleted successfully"))
+                else:
+                    self.stdout.write(self.style.ERROR(f"✗ Test file still exists after deletion"))
             else:
                 self.stdout.write(self.style.ERROR(f"✗ File was not found in storage after save!"))
         
