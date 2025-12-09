@@ -79,3 +79,24 @@ MemeLord takes various environment variables to configure `settings.py`:
 | `POSTGRES_USER`                  | PostgreSQL database user.                                                                                       | `memelord`                 | Optional            |
 | `POSTGRES_PASSWORD`              | PostgreSQL database password.                                                                                   | `memelord`                 | Optional            |
 | `POSTGRES_DB`                    | PostgreSQL database name.                                                                                       | `memelord`                 | Optional            |
+| `MAX_UPLOAD_SIZE_MB`             | Maximum file upload size in megabytes.                                                                          | `10`                       | Optional            |
+| `STORAGE_BACKEND`                | Storage backend to use. Options: `local`, `s3`, `azure`, `gcs`, `sftp`, `dropbox`, `ftp`. See [STORAGE_BACKENDS.md](STORAGE_BACKENDS.md) for detailed configuration. | `local`                    | Optional            |
+| `AWS_ACCESS_KEY_ID`              | AWS/S3 access key ID (required when `STORAGE_BACKEND=s3`).                                                     | `None`                     | Optional            |
+| `AWS_SECRET_ACCESS_KEY`          | AWS/S3 secret access key (required when `STORAGE_BACKEND=s3`).                                                 | `None`                     | Optional            |
+| `AWS_STORAGE_BUCKET_NAME`        | S3 bucket name (required when `STORAGE_BACKEND=s3`).                                                           | `None`                     | Optional            |
+| `AWS_S3_REGION_NAME`             | S3 region name.                                                                                                 | `us-east-1`                | Optional            |
+| `AWS_S3_ENDPOINT_URL`            | Custom S3 endpoint URL for S3-compatible services (MinIO, DigitalOcean Spaces, etc.).                         | `None`                     | Optional            |
+| `AZURE_ACCOUNT_NAME`             | Azure storage account name (required when `STORAGE_BACKEND=azure`).                                            | `None`                     | Optional            |
+| `AZURE_ACCOUNT_KEY`              | Azure storage account key (required when `STORAGE_BACKEND=azure`).                                             | `None`                     | Optional            |
+| `AZURE_CONTAINER`                | Azure blob storage container name.                                                                              | `media`                    | Optional            |
+| `GS_BUCKET_NAME`                 | Google Cloud Storage bucket name (required when `STORAGE_BACKEND=gcs`).                                        | `None`                     | Optional            |
+| `GS_PROJECT_ID`                  | Google Cloud project ID (required when `STORAGE_BACKEND=gcs`).                                                 | `None`                     | Optional            |
+| `GS_CREDENTIALS`                 | Path to Google Cloud credentials JSON file (required when `STORAGE_BACKEND=gcs`).                              | `None`                     | Optional            |
+| `SFTP_STORAGE_HOST`              | SFTP server hostname (required when `STORAGE_BACKEND=sftp`).                                                   | `None`                     | Optional            |
+| `SFTP_STORAGE_USERNAME`          | SFTP username (required when `STORAGE_BACKEND=sftp`).                                                          | `None`                     | Optional            |
+| `SFTP_STORAGE_PASSWORD`          | SFTP password (required when `STORAGE_BACKEND=sftp`).                                                          | `None`                     | Optional            |
+| `DROPBOX_OAUTH2_TOKEN`           | Dropbox OAuth2 token (required when `STORAGE_BACKEND=dropbox`).                                                | `None`                     | Optional            |
+| `FTP_STORAGE_LOCATION`           | FTP storage location URL (required when `STORAGE_BACKEND=ftp`).                                                | `None`                     | Optional            |
+
+> [!NOTE]
+> For detailed storage backend configuration including all available options for S3, Azure, GCS, SFTP, Dropbox, and FTP, see [STORAGE_BACKENDS.md](STORAGE_BACKENDS.md).

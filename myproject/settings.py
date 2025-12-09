@@ -87,13 +87,56 @@ raw_frame_ancestors = os.environ.get("CSP_FRAME_ANCESTORS", "'none'")
 # Split by comma, strip spaces, and keep properly quoted entries
 FRAME_ANCESTORS = [item.strip() for item in raw_frame_ancestors.split(',') if item.strip()]
 
+# Build CSP img-src list dynamically based on storage backend
+STORAGE_BACKEND = os.environ.get('STORAGE_BACKEND', 'local').lower()
+IMG_SRC_LIST = ["'self'", "data:", "blob:", "https://img.logo.dev"]
+
+# Add S3 domains to CSP if using S3 storage
+if STORAGE_BACKEND == 's3':
+    AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+    AWS_S3_CUSTOM_DOMAIN = os.environ.get('AWS_S3_CUSTOM_DOMAIN')
+    AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-east-1')
+    
+    if AWS_S3_CUSTOM_DOMAIN:
+        # If using custom domain (e.g., CloudFront)
+        IMG_SRC_LIST.append(f"https://{AWS_S3_CUSTOM_DOMAIN}")
+    elif AWS_STORAGE_BUCKET_NAME:
+        # Add virtual-hosted-style S3 URLs (bucket-name.s3.region.amazonaws.com)
+        IMG_SRC_LIST.append(f"https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com")
+        IMG_SRC_LIST.append(f"https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com")
+
+# Add Azure domains to CSP if using Azure storage
+elif STORAGE_BACKEND == 'azure':
+    AZURE_ACCOUNT_NAME = os.environ.get('AZURE_ACCOUNT_NAME')
+    AZURE_CUSTOM_DOMAIN = os.environ.get('AZURE_CUSTOM_DOMAIN')
+    
+    if AZURE_CUSTOM_DOMAIN:
+        IMG_SRC_LIST.append(f"https://{AZURE_CUSTOM_DOMAIN}")
+    elif AZURE_ACCOUNT_NAME:
+        # Azure Blob Storage uses account-name.blob.core.windows.net
+        IMG_SRC_LIST.append(f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net")
+
+# Add GCS domains to CSP if using GCS storage
+elif STORAGE_BACKEND == 'gcs':
+    GS_BUCKET_NAME = os.environ.get('GS_BUCKET_NAME')
+    GS_CUSTOM_ENDPOINT = os.environ.get('GS_CUSTOM_ENDPOINT')
+    
+    if GS_CUSTOM_ENDPOINT:
+        IMG_SRC_LIST.append(GS_CUSTOM_ENDPOINT)
+    elif GS_BUCKET_NAME:
+        # GCS can use multiple URL formats, add both
+        IMG_SRC_LIST.append("https://storage.googleapis.com")
+        IMG_SRC_LIST.append(f"https://storage.cloud.google.com")
+        # If using public URLs
+        IMG_SRC_LIST.append(f"https://{GS_BUCKET_NAME}.storage.googleapis.com")
+
 CONTENT_SECURITY_POLICY = {
     "DIRECTIVES": {
         "default-src": ["'self'"],
         "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.jsdelivr.net"],
         "script-src": ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdn.jsdelivr.net"],
         "font-src": ["'self'", "https://fonts.googleapis.com", "https://fonts.gstatic.com"],
-        "img-src": ["'self'", "data:", "blob:", "https://img.logo.dev"],
+        "img-src": IMG_SRC_LIST,
         "object-src": ["'none'"],
         "connect-src": ["'self'"],
         "frame-ancestors": FRAME_ANCESTORS,
@@ -110,7 +153,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'csp'
+    'csp',
+    'storages',
 ]
 
 MIDDLEWARE = [
@@ -218,6 +262,71 @@ LOCALE_PATHS = [
 
 LOGS_DIR = os.path.join(BASE_DIR, 'logs')
 
+# =============================================================================
+# LOGGING CONFIGURATION
+# =============================================================================
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOGS_DIR, 'django.log'),
+            'maxBytes': 1024 * 1024 * 15,  # 15MB
+            'backupCount': 10,
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': os.environ.get('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+        'myapp': {
+            'handlers': ['console', 'file'],
+            'level': os.environ.get('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+        'storages': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': False,
+        },
+        'boto3': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': False,
+        },
+        'botocore': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': False,
+        },
+    },
+    'root': {
+        'handlers': ['console', 'file'],
+        'level': 'INFO',
+    },
+}
+
+# Create logs directory if it doesn't exist
+os.makedirs(LOGS_DIR, exist_ok=True)
+
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'myapp', 'static')
 
@@ -234,12 +343,218 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 OIDC_ENABLED = os.environ.get('OIDC_ENABLED', 'False').lower() in ['true']
 OIDC_AUTOLOGIN = os.environ.get('OIDC_AUTOLOGIN', 'False').lower() in ['true']
 
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
-
 # Max file upload size in MB (default: 10MB)
 # Can be configured via MAX_UPLOAD_SIZE_MB environment variable
 MAX_UPLOAD_SIZE_MB = int(os.environ.get('MAX_UPLOAD_SIZE_MB', '10')) * 1024 * 1024
+
+# =============================================================================
+# STORAGE BACKEND CONFIGURATION
+# =============================================================================
+# IMPORTANT: This must be set BEFORE MEDIA_URL and MEDIA_ROOT
+# Configure storage backend via STORAGE_BACKEND environment variable
+# Supported backends: local, s3, azure, gcs, sftp, dropbox, ftp
+# Default: local (filesystem storage)
+
+STORAGE_BACKEND = os.environ.get('STORAGE_BACKEND', 'local').lower()
+
+# Django 5.0+ uses STORAGES instead of DEFAULT_FILE_STORAGE
+# Set both for compatibility
+if STORAGE_BACKEND == 's3':
+    # Amazon S3 / Compatible S3 Storage (MinIO, DigitalOcean Spaces, etc.)
+    AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+    AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-east-1')
+    AWS_S3_CUSTOM_DOMAIN = os.environ.get('AWS_S3_CUSTOM_DOMAIN')
+    AWS_S3_ENDPOINT_URL = os.environ.get('AWS_S3_ENDPOINT_URL')  # Only set for S3-compatible services (MinIO, etc.)
+    AWS_DEFAULT_ACL = os.environ.get('AWS_DEFAULT_ACL', 'private')
+    AWS_S3_OBJECT_PARAMETERS = {
+        'CacheControl': 'max-age=86400',
+    }
+    AWS_QUERYSTRING_AUTH = os.environ.get('AWS_QUERYSTRING_AUTH', 'True').lower() in ['true']
+    AWS_S3_FILE_OVERWRITE = os.environ.get('AWS_S3_FILE_OVERWRITE', 'False').lower() in ['true']
+    AWS_LOCATION = os.environ.get('AWS_LOCATION', 'media')
+    
+    # Use signature version 4 (required for all regions)
+    AWS_S3_SIGNATURE_VERSION = 's3v4'
+    
+    # Use virtual-hosted-style URLs (bucket-name.s3.region.amazonaws.com)
+    # This is the default and recommended format
+    AWS_S3_ADDRESSING_STYLE = 'virtual'
+    
+    # Django 5.0+ STORAGES configuration
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+    
+    # Legacy setting for older Django versions
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    
+    # Update MEDIA_URL
+    if AWS_S3_CUSTOM_DOMAIN:
+        MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
+    elif AWS_STORAGE_BUCKET_NAME:
+        # Use region-specific virtual-hosted-style URL
+        if AWS_S3_REGION_NAME == 'us-east-1':
+            MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/{AWS_LOCATION}/'
+        else:
+            MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/{AWS_LOCATION}/'
+    else:
+        MEDIA_URL = "/media/"
+    
+    MEDIA_ROOT = BASE_DIR / "media"
+
+elif STORAGE_BACKEND == 'azure':
+    # Microsoft Azure Blob Storage
+    AZURE_ACCOUNT_NAME = os.environ.get('AZURE_ACCOUNT_NAME')
+    AZURE_ACCOUNT_KEY = os.environ.get('AZURE_ACCOUNT_KEY')
+    AZURE_CONTAINER = os.environ.get('AZURE_CONTAINER', 'media')
+    AZURE_SSL = os.environ.get('AZURE_SSL', 'True').lower() in ['true']
+    AZURE_UPLOAD_MAX_CONN = int(os.environ.get('AZURE_UPLOAD_MAX_CONN', '2'))
+    AZURE_CONNECTION_TIMEOUT_SECS = int(os.environ.get('AZURE_CONNECTION_TIMEOUT_SECS', '20'))
+    AZURE_BLOB_MAX_MEMORY_SIZE = os.environ.get('AZURE_BLOB_MAX_MEMORY_SIZE', '2MB')
+    AZURE_URL_EXPIRATION_SECS = int(os.environ.get('AZURE_URL_EXPIRATION_SECS', '3600'))
+    AZURE_OVERWRITE_FILES = os.environ.get('AZURE_OVERWRITE_FILES', 'False').lower() in ['true']
+    AZURE_LOCATION = os.environ.get('AZURE_LOCATION', '')
+    AZURE_CUSTOM_DOMAIN = os.environ.get('AZURE_CUSTOM_DOMAIN')
+    
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.azure_storage.AzureStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+    
+    DEFAULT_FILE_STORAGE = 'storages.backends.azure_storage.AzureStorage'
+    
+    if AZURE_CUSTOM_DOMAIN:
+        MEDIA_URL = f'https://{AZURE_CUSTOM_DOMAIN}/{AZURE_LOCATION}'
+    elif AZURE_ACCOUNT_NAME:
+        MEDIA_URL = f'https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/{AZURE_LOCATION}'
+    else:
+        MEDIA_URL = "/media/"
+    
+    MEDIA_ROOT = BASE_DIR / "media"
+
+elif STORAGE_BACKEND == 'gcs':
+    # Google Cloud Storage
+    GS_BUCKET_NAME = os.environ.get('GS_BUCKET_NAME')
+    GS_PROJECT_ID = os.environ.get('GS_PROJECT_ID')
+    GS_CREDENTIALS = os.environ.get('GS_CREDENTIALS')
+    GS_DEFAULT_ACL = os.environ.get('GS_DEFAULT_ACL', 'private')
+    GS_FILE_OVERWRITE = os.environ.get('GS_FILE_OVERWRITE', 'False').lower() in ['true']
+    GS_LOCATION = os.environ.get('GS_LOCATION', 'media')
+    GS_CUSTOM_ENDPOINT = os.environ.get('GS_CUSTOM_ENDPOINT')
+    GS_QUERYSTRING_AUTH = os.environ.get('GS_QUERYSTRING_AUTH', 'True').lower() in ['true']
+    
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+    
+    DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+    
+    if GS_CUSTOM_ENDPOINT:
+        MEDIA_URL = f'{GS_CUSTOM_ENDPOINT}/{GS_LOCATION}/'
+    elif GS_BUCKET_NAME:
+        MEDIA_URL = f'https://storage.googleapis.com/{GS_BUCKET_NAME}/{GS_LOCATION}/'
+    else:
+        MEDIA_URL = "/media/"
+    
+    MEDIA_ROOT = BASE_DIR / "media"
+
+elif STORAGE_BACKEND == 'sftp':
+    # SFTP Storage
+    SFTP_STORAGE_HOST = os.environ.get('SFTP_STORAGE_HOST')
+    SFTP_STORAGE_ROOT = os.environ.get('SFTP_STORAGE_ROOT', '/media/')
+    SFTP_STORAGE_PARAMS = {
+        'port': int(os.environ.get('SFTP_STORAGE_PORT', '22')),
+        'username': os.environ.get('SFTP_STORAGE_USERNAME'),
+        'password': os.environ.get('SFTP_STORAGE_PASSWORD'),
+        'pkey': os.environ.get('SFTP_STORAGE_PRIVATE_KEY'),
+    }
+    SFTP_STORAGE_INTERACTIVE = os.environ.get('SFTP_STORAGE_INTERACTIVE', 'False').lower() in ['true']
+    SFTP_STORAGE_FILE_MODE = os.environ.get('SFTP_STORAGE_FILE_MODE')
+    SFTP_STORAGE_DIR_MODE = os.environ.get('SFTP_STORAGE_DIR_MODE')
+    SFTP_STORAGE_UID = os.environ.get('SFTP_STORAGE_UID')
+    SFTP_STORAGE_GID = os.environ.get('SFTP_STORAGE_GID')
+    SFTP_KNOWN_HOST_FILE = os.environ.get('SFTP_KNOWN_HOST_FILE')
+    
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.sftpstorage.SFTPStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+    
+    DEFAULT_FILE_STORAGE = 'storages.backends.sftpstorage.SFTPStorage'
+    MEDIA_URL = "/media/"
+    MEDIA_ROOT = BASE_DIR / "media"
+
+elif STORAGE_BACKEND == 'dropbox':
+    # Dropbox Storage
+    DROPBOX_OAUTH2_TOKEN = os.environ.get('DROPBOX_OAUTH2_TOKEN')
+    DROPBOX_ROOT_PATH = os.environ.get('DROPBOX_ROOT_PATH', '/media')
+    DROPBOX_TIMEOUT = int(os.environ.get('DROPBOX_TIMEOUT', '100'))
+    DROPBOX_WRITE_MODE = os.environ.get('DROPBOX_WRITE_MODE', 'add')
+    
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.dropbox.DropBoxStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+    
+    DEFAULT_FILE_STORAGE = 'storages.backends.dropbox.DropBoxStorage'
+    MEDIA_URL = "/media/"
+    MEDIA_ROOT = BASE_DIR / "media"
+
+elif STORAGE_BACKEND == 'ftp':
+    # FTP Storage
+    FTP_STORAGE_LOCATION = os.environ.get('FTP_STORAGE_LOCATION')
+    
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.ftp.FTPStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+    
+    DEFAULT_FILE_STORAGE = 'storages.backends.ftp.FTPStorage'
+    MEDIA_URL = "/media/"
+    MEDIA_ROOT = BASE_DIR / "media"
+
+else:
+    # Local filesystem storage (default)
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+    
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+    MEDIA_URL = "/media/"
+    MEDIA_ROOT = BASE_DIR / "media"
 
 if OIDC_ENABLED:
     # get oidc config from env
