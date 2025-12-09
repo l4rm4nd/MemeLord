@@ -1,6 +1,8 @@
 # Storage Backend Configuration
 
-This application now supports multiple storage backends via `django-storages`. You can configure which storage backend to use through environment variables.
+This application supports multiple storage backends via `django-storages`. 
+
+You can configure which storage backend to use through environment variables.
 
 ## Supported Storage Backends
 
@@ -11,6 +13,12 @@ This application now supports multiple storage backends via `django-storages`. Y
 - **sftp** - SFTP/SSH Storage
 - **dropbox** - Dropbox Storage
 - **ftp** - FTP Storage
+
+
+> [!WARNING]
+> Only the `local` and `s3` storage backends were tested and confirmed to be working.
+> 
+> Other backends should work but are subject to a proper `django-storages` configuration.
 
 ## Configuration
 
@@ -220,21 +228,6 @@ FTP_STORAGE_LOCATION=ftp://memelord:secure_pass@ftp.example.com:21/media
 
 ---
 
-## Installation
-
-The required packages are already added to `requirements.txt`. Install them with:
-
-```bash
-pip install -r requirements.txt
-```
-
-Or install individually:
-```bash
-pip install django-storages boto3 azure-storage-blob google-cloud-storage
-```
-
----
-
 ## Testing Your Configuration
 
 A Django management command is available to test and debug your storage backend configuration:
@@ -246,7 +239,7 @@ python manage.py test_storage
 This command will:
 - Display your current storage backend configuration
 - Show all relevant environment variables
-- Test file upload, retrieval, and deletion
+- Test file upload, retrieval, and optionally deletion
 - Verify the storage backend is working correctly
 - Display any errors with detailed tracebacks
 
@@ -276,9 +269,6 @@ Attempting to save test file: memes/user_test/test_storage_file.txt
 ✓ File URL: https://my-bucket.s3.amazonaws.com/media/memes/user_test/test_storage_file.txt
 ✓ File size: 54 bytes
 ✓ File content verified
-
-Cleaning up test file...
-✓ Test file deleted successfully
 
 === Test Complete ===
 ```
@@ -659,7 +649,3 @@ For longer expiration times or public access, consider setting ACLs to public:
 - S3: `AWS_DEFAULT_ACL=public-read`
 - GCS: `GS_DEFAULT_ACL=publicRead`
 - Azure: Use public containers or connection strings
-
----
-
-## Troubleshooting

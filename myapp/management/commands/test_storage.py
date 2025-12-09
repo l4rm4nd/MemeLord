@@ -7,6 +7,7 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +16,17 @@ class Command(BaseCommand):
     help = 'Test storage backend configuration and connectivity'
 
     def handle(self, *args, **options):
+        # Temporarily suppress verbose logging from boto3/botocore/storages unless DEBUG=True
+        debug_mode = settings.DEBUG
+        
+        if not debug_mode:
+            # Set logging levels to WARNING for storage-related libraries
+            logging.getLogger('boto3').setLevel(logging.WARNING)
+            logging.getLogger('botocore').setLevel(logging.WARNING)
+            logging.getLogger('storages').setLevel(logging.WARNING)
+            logging.getLogger('s3transfer').setLevel(logging.WARNING)
+            logging.getLogger('urllib3').setLevel(logging.WARNING)
+        
         self.stdout.write(self.style.SUCCESS('=== Storage Backend Test ===\n'))
         
         # Display current configuration

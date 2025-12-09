@@ -64,7 +64,6 @@ SESSION_COOKIE_SAMESITE = 'Lax'
 # =============================================================================
 # REDIS CACHE CONFIGURATION (for sessions and general caching)
 # =============================================================================
-# Configure Redis for cloud-native deployments
 # If REDIS_HOST is not set, sessions will use database (backward compatible)
 REDIS_HOST = os.environ.get("REDIS_HOST", "")
 REDIS_PORT = os.environ.get("REDIS_PORT", "6379")
