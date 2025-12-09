@@ -137,12 +137,34 @@ if STORAGE_BACKEND == 's3':
     AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
     AWS_S3_CUSTOM_DOMAIN = os.environ.get('AWS_S3_CUSTOM_DOMAIN')
     AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-east-1')
+    AWS_S3_ENDPOINT_URL = os.environ.get('AWS_S3_ENDPOINT_URL')
+    
+    # Use independent if statements - multiple can be true at once
+    # For example: MinIO (endpoint) + CloudFront (custom domain) + bucket name
     
     if AWS_S3_CUSTOM_DOMAIN:
-        # If using custom domain (e.g., CloudFront)
+        # If using custom domain (e.g., CloudFront CDN)
         IMG_SRC_LIST.append(f"https://{AWS_S3_CUSTOM_DOMAIN}")
-    elif AWS_STORAGE_BUCKET_NAME:
-        # Add virtual-hosted-style S3 URLs (bucket-name.s3.region.amazonaws.com)
+    
+    if AWS_S3_ENDPOINT_URL:
+        # For S3-compatible services (MinIO, DigitalOcean Spaces, Wasabi, etc.)
+        # Extract the hostname from the endpoint URL
+        from urllib.parse import urlparse
+        parsed_url = urlparse(AWS_S3_ENDPOINT_URL)
+        endpoint_domain = parsed_url.netloc
+        endpoint_scheme = parsed_url.scheme or 'https'
+        
+        # Add the endpoint domain with its scheme
+        IMG_SRC_LIST.append(f"{endpoint_scheme}://{endpoint_domain}")
+        
+        # Also add bucket-based URL format for S3-compatible services
+        # Some services use: https://bucket-name.endpoint.com
+        if endpoint_domain and AWS_STORAGE_BUCKET_NAME:
+            IMG_SRC_LIST.append(f"{endpoint_scheme}://{AWS_STORAGE_BUCKET_NAME}.{endpoint_domain}")
+    
+    if AWS_STORAGE_BUCKET_NAME:
+        # Standard AWS S3 - Add virtual-hosted-style S3 URLs
+        # This is independent of endpoint URL (could be both AWS S3 and custom endpoint)
         IMG_SRC_LIST.append(f"https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com")
         IMG_SRC_LIST.append(f"https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com")
 
@@ -151,9 +173,12 @@ elif STORAGE_BACKEND == 'azure':
     AZURE_ACCOUNT_NAME = os.environ.get('AZURE_ACCOUNT_NAME')
     AZURE_CUSTOM_DOMAIN = os.environ.get('AZURE_CUSTOM_DOMAIN')
     
+    # Use independent if statements - both can be true at once
     if AZURE_CUSTOM_DOMAIN:
+        # Custom CDN domain
         IMG_SRC_LIST.append(f"https://{AZURE_CUSTOM_DOMAIN}")
-    elif AZURE_ACCOUNT_NAME:
+    
+    if AZURE_ACCOUNT_NAME:
         # Azure Blob Storage uses account-name.blob.core.windows.net
         IMG_SRC_LIST.append(f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net")
 
@@ -162,14 +187,48 @@ elif STORAGE_BACKEND == 'gcs':
     GS_BUCKET_NAME = os.environ.get('GS_BUCKET_NAME')
     GS_CUSTOM_ENDPOINT = os.environ.get('GS_CUSTOM_ENDPOINT')
     
+    # Use independent if statements - both can be true at once
     if GS_CUSTOM_ENDPOINT:
+        # Custom endpoint or CDN
         IMG_SRC_LIST.append(GS_CUSTOM_ENDPOINT)
-    elif GS_BUCKET_NAME:
-        # GCS can use multiple URL formats, add both
+    
+    if GS_BUCKET_NAME:
+        # GCS can use multiple URL formats, add all common ones
         IMG_SRC_LIST.append("https://storage.googleapis.com")
-        IMG_SRC_LIST.append(f"https://storage.cloud.google.com")
-        # If using public URLs
+        IMG_SRC_LIST.append("https://storage.cloud.google.com")
+        # Bucket-specific subdomain format
         IMG_SRC_LIST.append(f"https://{GS_BUCKET_NAME}.storage.googleapis.com")
+
+# Add SFTP/Dropbox/FTP domains to CSP if using those backends
+# Note: These typically serve files through Django's media serving or require reverse proxy
+# For SFTP, Dropbox, and FTP, files are usually accessed via Django views
+# which serve them from 'self', so no additional CSP entries needed
+# unless you have a custom domain setup
+
+elif STORAGE_BACKEND == 'sftp':
+    # SFTP files are typically served through Django media views
+    # If you have a custom domain for SFTP file access, add it here
+    SFTP_CUSTOM_DOMAIN = os.environ.get('SFTP_CUSTOM_DOMAIN')
+    if SFTP_CUSTOM_DOMAIN:
+        IMG_SRC_LIST.append(f"https://{SFTP_CUSTOM_DOMAIN}")
+
+elif STORAGE_BACKEND == 'dropbox':
+    # Dropbox shared file URLs use various Dropbox CDN domains
+    # Add common Dropbox content delivery domains
+    # Note: Dropbox URLs are typically served through Django views when using django-storages
+    # but if using direct Dropbox links, these domains are needed
+    IMG_SRC_LIST.extend([
+        "https://dl.dropboxusercontent.com",
+        "https://www.dropbox.com",
+        "https://content.dropboxapi.com",
+    ])
+
+elif STORAGE_BACKEND == 'ftp':
+    # FTP files are typically served through Django media views
+    # If you have a custom domain for FTP file access, add it here
+    FTP_CUSTOM_DOMAIN = os.environ.get('FTP_CUSTOM_DOMAIN')
+    if FTP_CUSTOM_DOMAIN:
+        IMG_SRC_LIST.append(f"https://{FTP_CUSTOM_DOMAIN}")
 
 CONTENT_SECURITY_POLICY = {
     "DIRECTIVES": {
