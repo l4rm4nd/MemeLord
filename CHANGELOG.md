@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/l4rm4nd/MemeLord/compare/v1.2.1...v1.2.2) (2025-12-09)
+
+
+### Bug Fixes
+
+* improve csp whitelists for new storage providers ([ca7f0f1](https://github.com/l4rm4nd/MemeLord/commit/ca7f0f154d4294d86dabfb6051f31c61fb15e33d))
+
 ## [1.2.1](https://github.com/l4rm4nd/MemeLord/compare/v1.2.0...v1.2.1) (2025-12-09)
 
 
@@ -26,11 +33,4 @@
 ### Bug Fixes
 
 * meme ordering (latest > oldest) ([7700b41](https://github.com/l4rm4nd/MemeLord/commit/7700b4169329f28dd42111c4f740a53719ed729f))
-
-## [1.0.17](https://github.com/l4rm4nd/MemeLord/compare/v1.0.16...v1.0.17) (2025-12-08)
-
-
-### Bug Fixes
-
-* properly construct tags with js ([b0e85c8](https://github.com/l4rm4nd/MemeLord/commit/b0e85c82cc673b38f08b4184bb22be25e2cea632))
 
