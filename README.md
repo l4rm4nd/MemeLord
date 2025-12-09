@@ -97,6 +97,13 @@ MemeLord takes various environment variables to configure `settings.py`:
 | `SFTP_STORAGE_PASSWORD`          | SFTP password (required when `STORAGE_BACKEND=sftp`).                                                          | `None`                     | Optional            |
 | `DROPBOX_OAUTH2_TOKEN`           | Dropbox OAuth2 token (required when `STORAGE_BACKEND=dropbox`).                                                | `None`                     | Optional            |
 | `FTP_STORAGE_LOCATION`           | FTP storage location URL (required when `STORAGE_BACKEND=ftp`).                                                | `None`                     | Optional            |
+| `REDIS_HOST`                     | Redis server hostname for session storage and caching. When set, enables cloud-native Redis sessions. See [STORAGE_BACKENDS.md](STORAGE_BACKENDS.md) for details. | `None`                     | Optional            |
+| `REDIS_PORT`                     | Redis server port.                                                                                              | `6379`                     | Optional            |
+| `REDIS_DB`                       | Redis database number.                                                                                          | `0`                        | Optional            |
+| `REDIS_PASSWORD`                 | Redis server password (if authentication is enabled).                                                           | `None`                     | Optional            |
 
 > [!NOTE]
 > For detailed storage backend configuration including all available options for S3, Azure, GCS, SFTP, Dropbox, and FTP, see [STORAGE_BACKENDS.md](STORAGE_BACKENDS.md).
+
+> [!TIP]
+> **Cloud-Native Deployments:** For horizontally scaled deployments (Kubernetes, Docker Swarm, ECS, etc.), configure Redis sessions by setting `REDIS_HOST` to enable shared session storage across all application instances. See [STORAGE_BACKENDS.md](STORAGE_BACKENDS.md) for Redis configuration examples.

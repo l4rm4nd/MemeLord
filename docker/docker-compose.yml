@@ -39,6 +39,42 @@ services:
       #- OIDC_OP_USER_ENDPOINT=https://authentik.example.com/application/o/userinfo/
       # Length of time it takes for an id token to expire in seconds	
       #- OIDC_RENEW_ID_TOKEN_EXPIRY_SECONDS=900
+      # ------- STORAGE BACKENDS --------
+      # Storage backend: local (default), s3, azure, gcs, sftp, dropbox, ftp
+      #- STORAGE_BACKEND=local
+      # Maximum file upload size in megabytes
+      #- MAX_UPLOAD_SIZE_MB=10
+      # --- AWS S3 / S3-Compatible Storage ---
+      #- AWS_ACCESS_KEY_ID=your_access_key
+      #- AWS_SECRET_ACCESS_KEY=your_secret_key
+      #- AWS_STORAGE_BUCKET_NAME=memelord-bucket
+      #- AWS_S3_REGION_NAME=us-east-1
+      #- AWS_S3_ENDPOINT_URL=https://s3.example.com  # For MinIO, DigitalOcean Spaces, etc.
+      #- AWS_DEFAULT_ACL=private
+      #- AWS_LOCATION=media
+      # --- Microsoft Azure Blob Storage ---
+      #- AZURE_ACCOUNT_NAME=your_account
+      #- AZURE_ACCOUNT_KEY=your_key
+      #- AZURE_CONTAINER=media
+      # --- Google Cloud Storage ---
+      #- GS_BUCKET_NAME=memelord-bucket
+      #- GS_PROJECT_ID=your-project-id
+      #- GS_CREDENTIALS=/app/credentials.json
+      # --- SFTP Storage ---
+      #- SFTP_STORAGE_HOST=sftp.example.com
+      #- SFTP_STORAGE_USERNAME=user
+      #- SFTP_STORAGE_PASSWORD=password
+      #- SFTP_STORAGE_PORT=22
+      # --- Dropbox Storage ---
+      #- DROPBOX_OAUTH2_TOKEN=your_token
+      # --- FTP Storage ---
+      #- FTP_STORAGE_LOCATION=ftp://user:pass@host:21/path
+      # ------- REDIS SESSIONS --------
+      # Redis for session storage and caching (enables horizontal scaling)
+      #- REDIS_HOST=redis
+      #- REDIS_PORT=6379
+      #- REDIS_DB=0
+      #- REDIS_PASSWORD=
       # ------- PSQL DB ENVS --------
       #- DB_ENGINE=postgres
       #- POSTGRES_USER=memelord
@@ -68,8 +104,8 @@ services:
     #  - traefik.http.routers.memelord.middlewares=local-ipwhitelist@file
 
 #  db:
-#    container_name: memelord-psql
 #    image: postgres:16-alpine
+#    container_name: memelord-psql
 #    restart: unless-stopped
 #    expose:
 #      - 5432
@@ -79,6 +115,21 @@ services:
 #      - POSTGRES_USER=memelord
 #      - POSTGRES_PASSWORD=memelord
 #      - POSTGRES_DB=memelord
+#    #networks:
+#    #  - internal
+
+#  redis:
+#    image: redis:7-alpine
+#    container_name: memelord-redis
+#    restart: unless-stopped
+#    expose:
+#      - 6379
+#    volumes:
+#      - ./volume-data/redis:/data
+#    # Enable Redis persistence with AOF (recommended for session storage)
+#    command: redis-server --appendonly yes --appendfsync everysec
+#    # Optional: Enable password authentication
+#    #command: redis-server --appendonly yes --appendfsync everysec --requirepass your_password
 #    #networks:
 #    #  - internal
 
