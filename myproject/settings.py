@@ -138,48 +138,89 @@ if STORAGE_BACKEND == 's3':
     AWS_S3_CUSTOM_DOMAIN = os.environ.get('AWS_S3_CUSTOM_DOMAIN')
     AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-east-1')
     AWS_S3_ENDPOINT_URL = os.environ.get('AWS_S3_ENDPOINT_URL')
+    AWS_S3_USE_ACCELERATE_ENDPOINT = os.environ.get('AWS_S3_USE_ACCELERATE_ENDPOINT', 'False').lower() in ['true']
     
-    # Use independent if statements - multiple can be true at once
-    # For example: MinIO (endpoint) + CloudFront (custom domain) + bucket name
-    
+    # Always add custom domain if specified (CDN like CloudFront)
     if AWS_S3_CUSTOM_DOMAIN:
-        # If using custom domain (e.g., CloudFront CDN)
         IMG_SRC_LIST.append(f"https://{AWS_S3_CUSTOM_DOMAIN}")
     
+    # Detect S3 provider based on endpoint URL
     if AWS_S3_ENDPOINT_URL:
-        # For S3-compatible services (MinIO, DigitalOcean Spaces, Wasabi, etc.)
-        # Extract the hostname from the endpoint URL
+        # S3-compatible service detected
         from urllib.parse import urlparse
         parsed_url = urlparse(AWS_S3_ENDPOINT_URL)
         endpoint_domain = parsed_url.netloc
         endpoint_scheme = parsed_url.scheme or 'https'
         
-        # Add the endpoint domain with its scheme
+        # Add the endpoint domain
         IMG_SRC_LIST.append(f"{endpoint_scheme}://{endpoint_domain}")
         
-        # Also add bucket-based URL format for S3-compatible services
-        # Some services use: https://bucket-name.endpoint.com
+        # Add bucket-based subdomain format if applicable
         if endpoint_domain and AWS_STORAGE_BUCKET_NAME:
             IMG_SRC_LIST.append(f"{endpoint_scheme}://{AWS_STORAGE_BUCKET_NAME}.{endpoint_domain}")
+        
+        # Provider-specific URL patterns
+        endpoint_lower = endpoint_domain.lower() if endpoint_domain else ""
+        
+        # DigitalOcean Spaces: also add CDN domain
+        if 'digitaloceanspaces.com' in endpoint_lower:
+            # DigitalOcean Spaces CDN format: bucket-name.region.cdn.digitaloceanspaces.com
+            if AWS_STORAGE_BUCKET_NAME and AWS_S3_REGION_NAME:
+                IMG_SRC_LIST.append(f"https://{AWS_STORAGE_BUCKET_NAME}.{AWS_S3_REGION_NAME}.cdn.digitaloceanspaces.com")
+        
+        # Cloudflare R2: also add public bucket URL format
+        elif 'r2.cloudflarestorage.com' in endpoint_lower:
+            # Cloudflare R2 can use custom domains via public.r2.dev
+            # Format: https://bucket-name.account-id.r2.dev (if public)
+            # This is typically set via AWS_S3_CUSTOM_DOMAIN, but we note it here
+            pass
+        
+        # Wasabi: supports path-style and virtual-hosted-style
+        elif 'wasabisys.com' in endpoint_lower:
+            # Already covered by endpoint_domain and bucket subdomain
+            pass
+        
+        # Linode Object Storage: supports path-style and virtual-hosted-style  
+        elif 'linodeobjects.com' in endpoint_lower:
+            # Already covered by endpoint_domain and bucket subdomain
+            pass
+        
+        # Backblaze B2: supports path-style and virtual-hosted-style
+        elif 'backblazeb2.com' in endpoint_lower:
+            # Already covered by endpoint_domain and bucket subdomain
+            pass
+        
+        # MinIO: custom deployment, already covered
+        # Other S3-compatible services: already covered
     
-    if AWS_STORAGE_BUCKET_NAME:
-        # Standard AWS S3 - Add virtual-hosted-style S3 URLs
-        # This is independent of endpoint URL (could be both AWS S3 and custom endpoint)
-        IMG_SRC_LIST.append(f"https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com")
-        IMG_SRC_LIST.append(f"https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com")
+    else:
+        # No endpoint URL = Standard AWS S3
+        if AWS_STORAGE_BUCKET_NAME:
+            # Add AWS S3 virtual-hosted-style URLs
+            IMG_SRC_LIST.append(f"https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com")
+            IMG_SRC_LIST.append(f"https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com")
+            
+            # Add path-style URL format (legacy but still supported)
+            IMG_SRC_LIST.append("https://s3.amazonaws.com")
+            IMG_SRC_LIST.append(f"https://s3.{AWS_S3_REGION_NAME}.amazonaws.com")
+            
+            # Add dual-stack endpoints (IPv6 support)
+            IMG_SRC_LIST.append(f"https://{AWS_STORAGE_BUCKET_NAME}.s3.dualstack.{AWS_S3_REGION_NAME}.amazonaws.com")
+            
+            # Add S3 Transfer Acceleration endpoint if enabled
+            if AWS_S3_USE_ACCELERATE_ENDPOINT:
+                IMG_SRC_LIST.append(f"https://{AWS_STORAGE_BUCKET_NAME}.s3-accelerate.amazonaws.com")
+                IMG_SRC_LIST.append(f"https://{AWS_STORAGE_BUCKET_NAME}.s3-accelerate.dualstack.amazonaws.com")
 
 # Add Azure domains to CSP if using Azure storage
 elif STORAGE_BACKEND == 'azure':
     AZURE_ACCOUNT_NAME = os.environ.get('AZURE_ACCOUNT_NAME')
     AZURE_CUSTOM_DOMAIN = os.environ.get('AZURE_CUSTOM_DOMAIN')
     
-    # Use independent if statements - both can be true at once
     if AZURE_CUSTOM_DOMAIN:
-        # Custom CDN domain
         IMG_SRC_LIST.append(f"https://{AZURE_CUSTOM_DOMAIN}")
     
     if AZURE_ACCOUNT_NAME:
-        # Azure Blob Storage uses account-name.blob.core.windows.net
         IMG_SRC_LIST.append(f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net")
 
 # Add GCS domains to CSP if using GCS storage
@@ -187,48 +228,39 @@ elif STORAGE_BACKEND == 'gcs':
     GS_BUCKET_NAME = os.environ.get('GS_BUCKET_NAME')
     GS_CUSTOM_ENDPOINT = os.environ.get('GS_CUSTOM_ENDPOINT')
     
-    # Use independent if statements - both can be true at once
     if GS_CUSTOM_ENDPOINT:
-        # Custom endpoint or CDN
         IMG_SRC_LIST.append(GS_CUSTOM_ENDPOINT)
     
     if GS_BUCKET_NAME:
-        # GCS can use multiple URL formats, add all common ones
+        # GCS can use multiple URL formats
         IMG_SRC_LIST.append("https://storage.googleapis.com")
         IMG_SRC_LIST.append("https://storage.cloud.google.com")
-        # Bucket-specific subdomain format
         IMG_SRC_LIST.append(f"https://{GS_BUCKET_NAME}.storage.googleapis.com")
 
-# Add SFTP/Dropbox/FTP domains to CSP if using those backends
-# Note: These typically serve files through Django's media serving or require reverse proxy
-# For SFTP, Dropbox, and FTP, files are usually accessed via Django views
-# which serve them from 'self', so no additional CSP entries needed
-# unless you have a custom domain setup
-
+# SFTP/Dropbox typically serve through Django (using 'self' origin)
 elif STORAGE_BACKEND == 'sftp':
-    # SFTP files are typically served through Django media views
-    # If you have a custom domain for SFTP file access, add it here
+    # SFTP files are retrieved by Django and served through Django views
+    # Optional: If you have nginx serving the same SFTP directory via HTTP
     SFTP_CUSTOM_DOMAIN = os.environ.get('SFTP_CUSTOM_DOMAIN')
     if SFTP_CUSTOM_DOMAIN:
         IMG_SRC_LIST.append(f"https://{SFTP_CUSTOM_DOMAIN}")
 
 elif STORAGE_BACKEND == 'dropbox':
-    # Dropbox shared file URLs use various Dropbox CDN domains
-    # Add common Dropbox content delivery domains
-    # Note: Dropbox URLs are typically served through Django views when using django-storages
-    # but if using direct Dropbox links, these domains are needed
-    IMG_SRC_LIST.extend([
-        "https://dl.dropboxusercontent.com",
-        "https://www.dropbox.com",
-        "https://content.dropboxapi.com",
-    ])
+    # Dropbox files are retrieved by Django and served through Django views
+    # No additional CSP configuration needed
+    pass
 
 elif STORAGE_BACKEND == 'ftp':
-    # FTP files are typically served through Django media views
-    # If you have a custom domain for FTP file access, add it here
+    # FTP files are retrieved by Django and served through Django views
+    # Optional: If you have nginx serving the same FTP directory via HTTP
     FTP_CUSTOM_DOMAIN = os.environ.get('FTP_CUSTOM_DOMAIN')
     if FTP_CUSTOM_DOMAIN:
         IMG_SRC_LIST.append(f"https://{FTP_CUSTOM_DOMAIN}")
+
+CSP_IMG_SRC_EXTRA = os.environ.get('CSP_IMG_SRC_EXTRA', '')
+if CSP_IMG_SRC_EXTRA: 
+    extra_domains = [domain.strip() for domain in CSP_IMG_SRC_EXTRA.split(',') if domain.strip()] 
+    IMG_SRC_LIST.extend(extra_domains)
 
 CONTENT_SECURITY_POLICY = {
     "DIRECTIVES": {

@@ -7,18 +7,18 @@ You can configure which storage backend to use through environment variables.
 ## Supported Storage Backends
 
 - **local** - Local filesystem storage (default)
-- **s3** - Amazon S3 or S3-compatible services (MinIO, DigitalOcean Spaces, etc.)
+- **s3** - Amazon S3 or S3-compatible services (MinIO, DigitalOcean Spaces, Wasabi, Linode, Backblaze B2, etc.)
 - **azure** - Microsoft Azure Blob Storage
 - **gcs** - Google Cloud Storage
 - **sftp** - SFTP/SSH Storage
 - **dropbox** - Dropbox Storage
-- **ftp** - FTP Storage
-
 
 > [!WARNING]
 > Only the `local` and `s3` storage backends were tested and confirmed to be working.
 > 
 > Other backends should work but are subject to a proper `django-storages` configuration.
+>
+> **FTP storage backend has been removed** as it is not recommended for production use and lacks proper security features.
 
 ## Configuration
 
@@ -55,6 +55,7 @@ AWS_DEFAULT_ACL=private                    # Default: private
 AWS_QUERYSTRING_AUTH=True                  # Use signed URLs (default: True)
 AWS_S3_FILE_OVERWRITE=False                # Overwrite files with same name (default: False)
 AWS_LOCATION=media                         # Folder within bucket (default: media)
+AWS_S3_USE_ACCELERATE_ENDPOINT=False       # Enable S3 Transfer Acceleration (default: False)
 ```
 
 ### Example for MinIO:
@@ -75,6 +76,56 @@ AWS_SECRET_ACCESS_KEY=your_do_spaces_secret
 AWS_STORAGE_BUCKET_NAME=your_space_name
 AWS_S3_ENDPOINT_URL=https://nyc3.digitaloceanspaces.com
 AWS_S3_REGION_NAME=nyc3
+```
+
+### Example for Wasabi:
+```bash
+STORAGE_BACKEND=s3
+AWS_ACCESS_KEY_ID=your_wasabi_key
+AWS_SECRET_ACCESS_KEY=your_wasabi_secret
+AWS_STORAGE_BUCKET_NAME=memelord-bucket
+AWS_S3_ENDPOINT_URL=https://s3.wasabisys.com
+AWS_S3_REGION_NAME=us-east-1
+```
+
+### Example for Linode Object Storage:
+```bash
+STORAGE_BACKEND=s3
+AWS_ACCESS_KEY_ID=your_linode_key
+AWS_SECRET_ACCESS_KEY=your_linode_secret
+AWS_STORAGE_BUCKET_NAME=memelord-bucket
+AWS_S3_ENDPOINT_URL=https://us-east-1.linodeobjects.com
+AWS_S3_REGION_NAME=us-east-1
+```
+
+### Example for Backblaze B2:
+```bash
+STORAGE_BACKEND=s3
+AWS_ACCESS_KEY_ID=your_b2_key_id
+AWS_SECRET_ACCESS_KEY=your_b2_application_key
+AWS_STORAGE_BUCKET_NAME=memelord-bucket
+AWS_S3_ENDPOINT_URL=https://s3.us-west-001.backblazeb2.com
+AWS_S3_REGION_NAME=us-west-001
+```
+
+### Example with CloudFront CDN:
+```bash
+STORAGE_BACKEND=s3
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
+AWS_STORAGE_BUCKET_NAME=memelord-bucket
+AWS_S3_REGION_NAME=us-east-1
+AWS_S3_CUSTOM_DOMAIN=d1234567890.cloudfront.net
+```
+
+### Example with S3 Transfer Acceleration:
+```bash
+STORAGE_BACKEND=s3
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
+AWS_STORAGE_BUCKET_NAME=memelord-bucket
+AWS_S3_REGION_NAME=us-east-1
+AWS_S3_USE_ACCELERATE_ENDPOINT=True
 ```
 
 ---
@@ -169,6 +220,7 @@ SFTP_STORAGE_DIR_MODE=0755                 # Directory permissions
 SFTP_STORAGE_UID=1000                      # User ID
 SFTP_STORAGE_GID=1000                      # Group ID
 SFTP_KNOWN_HOST_FILE=/path/to/known_hosts  # Known hosts file
+SFTP_CUSTOM_DOMAIN=cdn.example.com         # If serving via nginx/apache on separate domain
 ```
 
 ### Example:
@@ -209,22 +261,6 @@ DROPBOX_ROOT_PATH=/Apps/MemeLord/media
 1. Create an app at https://www.dropbox.com/developers/apps
 2. Generate an access token in the app settings
 3. Use that token as `DROPBOX_OAUTH2_TOKEN`
-
----
-
-## FTP Storage
-
-### Required Environment Variables:
-```bash
-STORAGE_BACKEND=ftp
-FTP_STORAGE_LOCATION=ftp://username:password@host:port/path
-```
-
-### Example:
-```bash
-STORAGE_BACKEND=ftp
-FTP_STORAGE_LOCATION=ftp://memelord:secure_pass@ftp.example.com:21/media
-```
 
 ---
 
@@ -346,10 +382,6 @@ ERROR Error during storage test: An error occurred (NoSuchBucket) when calling t
 # Using AWS CLI to sync local media to S3
 aws s3 sync ./media/ s3://your-bucket-name/media/ --acl private
 ```
-
----
-
-## Troubleshooting
 
 ---
 
@@ -500,51 +532,115 @@ The Redis cache is configured with:
 
 ---
 
-## Troubleshooting
-
----
-
-## Security Best Practices
-
-1. **Never commit credentials** to version control
-2. **Use environment variables** or secret management services
-3. **Use private ACLs** for sensitive content
-4. **Enable HTTPS** for all cloud storage endpoints
-5. **Rotate access keys** regularly
-6. **Use IAM roles** instead of access keys when running on cloud platforms
-7. **Enable versioning** on your cloud storage buckets
-8. **Set up proper CORS policies** if accessing files from browsers
-
----
-
-## Additional Resources
-
-- [django-storages Documentation](https://django-storages.readthedocs.io/)
-- [Amazon S3 Documentation](https://docs.aws.amazon.com/s3/)
-- [Azure Blob Storage Documentation](https://docs.microsoft.com/en-us/azure/storage/blobs/)
-- [Google Cloud Storage Documentation](https://cloud.google.com/storage/docs)
-
----
-
 ## Content Security Policy (CSP) Configuration
 
-When using cloud storage backends, you need to ensure your Content Security Policy allows images from the storage provider's domain. The application automatically configures CSP based on your storage backend, but you should be aware of the URL formats used.
+When using cloud storage backends, you need to ensure your Content Security Policy allows images from the storage provider's domain. The application **automatically configures CSP** based on your storage backend using **smart provider detection** to avoid unnecessary whitelisting.
 
-### Automatic CSP Configuration
+### Automatic CSP Configuration with Smart Provider Detection
 
-The application automatically adds the appropriate domains to the CSP `img-src` directive based on your `STORAGE_BACKEND` setting:
+The application automatically adds the appropriate domains to the CSP `img-src` directive based on your `STORAGE_BACKEND` setting. **Importantly, it only whitelists the specific provider you're using**, not all possible providers.
 
-**S3 Storage:**
+#### S3 Storage (AWS S3 and S3-Compatible Services)
+
+**Provider Detection Logic:**
+- If `AWS_S3_ENDPOINT_URL` is **NOT set** → Assumes **AWS S3** and whitelists AWS-specific URLs only
+- If `AWS_S3_ENDPOINT_URL` **IS set** → Detects the S3-compatible provider and whitelists only that provider's URLs
+
+**For AWS S3 (when no endpoint URL is set):**
+The application whitelists these AWS-specific formats:
 - `https://bucket-name.s3.amazonaws.com` (global endpoint)
 - `https://bucket-name.s3.region.amazonaws.com` (region-specific endpoint)
+- `https://s3.amazonaws.com` (path-style, legacy)
+- `https://s3.region.amazonaws.com` (path-style with region)
+- `https://bucket-name.s3.dualstack.region.amazonaws.com` (IPv6 support)
+- `https://bucket-name.s3-accelerate.amazonaws.com` (if `AWS_S3_USE_ACCELERATE_ENDPOINT=True`)
+- `https://bucket-name.s3-accelerate.dualstack.amazonaws.com` (if acceleration enabled)
 
-**Azure Storage:**
+**For S3-Compatible Services (when endpoint URL is set):**
+The application automatically detects the provider and whitelists:
+- The endpoint domain from `AWS_S3_ENDPOINT_URL`
+- Bucket-based subdomain format: `https://bucket-name.endpoint-domain.com`
+
+**Provider-Specific Additional URLs:**
+- **DigitalOcean Spaces**: Also adds CDN domain `https://bucket-name.region.cdn.digitaloceanspaces.com`
+- **Cloudflare R2**: Endpoint domain only (use `AWS_S3_CUSTOM_DOMAIN` for R2 public URLs)
+- **Wasabi, Linode, Backblaze B2, MinIO**: Endpoint and bucket subdomain formats
+
+**Custom CDN (CloudFront, etc.):**
+- If `AWS_S3_CUSTOM_DOMAIN` is set, that domain is always added to the whitelist
+
+**Example - Using MinIO:**
+```bash
+AWS_S3_ENDPOINT_URL=https://minio.example.com
+AWS_STORAGE_BUCKET_NAME=memelord
+```
+**CSP Whitelist:** Only `https://minio.example.com` and `https://memelord.minio.example.com` are added. AWS endpoints are **NOT** whitelisted.
+
+**Example - Using AWS S3:**
+```bash
+# No AWS_S3_ENDPOINT_URL set
+AWS_STORAGE_BUCKET_NAME=memelord
+AWS_S3_REGION_NAME=us-west-2
+```
+**CSP Whitelist:** Only AWS S3 URLs are added. MinIO/DigitalOcean/etc. endpoints are **NOT** whitelisted.
+
+#### Azure Storage
+
+**Azure Blob Storage URLs:**
 - `https://account-name.blob.core.windows.net`
 
-**Google Cloud Storage:**
+**Custom CDN:**
+- The domain specified in `AZURE_CUSTOM_DOMAIN`
+
+#### Google Cloud Storage
+
+**GCS URLs (all common formats):**
 - `https://storage.googleapis.com`
 - `https://storage.cloud.google.com`
 - `https://bucket-name.storage.googleapis.com`
+
+**Custom endpoint or CDN:**
+- The domain specified in `GS_CUSTOM_ENDPOINT`
+
+#### SFTP, Dropbox Storage
+
+**Default behavior:** Files are retrieved by Django and served through Django views using the `'self'` origin (already in CSP whitelist). **No additional CSP configuration is needed.**
+
+**Optional:** If you have a separate web server (nginx/apache) serving the SFTP directory via HTTP, you can whitelist that domain:
+
+```bash
+# For SFTP
+SFTP_CUSTOM_DOMAIN=cdn.example.com
+```
+
+### Manual CSP IMG-SRC Whitelist Override
+
+For edge cases, custom CDNs, or domains not automatically detected, you can manually add additional domains to the CSP `img-src` whitelist:
+
+**Environment Variable:**
+```bash
+CSP_IMG_SRC_EXTRA=https://cdn.example.com,https://cdn2.example.com,https://custom-domain.net
+```
+
+This is useful for:
+- Custom CDN configurations not detected automatically
+- Multiple CDN providers
+- Proxy servers or image transformation services
+- Migration scenarios where you need to support multiple storage backends temporarily
+
+**Example: AWS S3 with Multiple CDNs:**
+```bash
+STORAGE_BACKEND=s3
+AWS_STORAGE_BUCKET_NAME=memelord
+AWS_S3_REGION_NAME=us-east-1
+AWS_S3_CUSTOM_DOMAIN=d1234567890.cloudfront.net
+CSP_IMG_SRC_EXTRA=https://cdn.example.com,https://backup-cdn.example.com
+```
+
+This configuration will whitelist:
+- AWS S3 URLs (auto-detected)
+- CloudFront domain (from `AWS_S3_CUSTOM_DOMAIN`)
+- Your two custom CDN domains (from `CSP_IMG_SRC_EXTRA`)
 
 ### Important Notes on URL Formats
 
@@ -560,6 +656,8 @@ The application uses **virtual-hosted-style URLs** by default (via `AWS_S3_ADDRE
 - Path-style URLs are being deprecated by AWS
 - Signed URLs must use the same format as the endpoint configuration
 
+**The application whitelists BOTH formats** to ensure maximum compatibility.
+
 #### Azure Blob Storage URLs
 
 Azure uses the format: `https://account-name.blob.core.windows.net/container-name/path/to/file`
@@ -569,6 +667,8 @@ Azure uses the format: `https://account-name.blob.core.windows.net/container-nam
 GCS supports multiple URL formats:
 - Canonical: `https://storage.googleapis.com/bucket-name/path/to/file`
 - XML API: `https://bucket-name.storage.googleapis.com/path/to/file`
+
+**The application whitelists ALL common GCS URL formats** automatically.
 
 ### Common CSP Issues
 
@@ -586,6 +686,23 @@ at https://example.s3.amazonaws.com/... because it violates the following direct
 ```
 
 This means the storage URL is not in the CSP allowlist. Verify your `STORAGE_BACKEND` environment variable is set and restart Django.
+
+### S3-Compatible Services CSP Support
+
+The application automatically detects and whitelists domains for all major S3-compatible providers:
+
+| Provider | Automatic CSP Support | Example Endpoint |
+|----------|----------------------|------------------|
+| **AWS S3** | ✅ Yes | Automatic (no endpoint needed) |
+| **MinIO** | ✅ Yes | `https://minio.example.com` |
+| **DigitalOcean Spaces** | ✅ Yes | `https://nyc3.digitaloceanspaces.com` |
+| **Wasabi** | ✅ Yes | `https://s3.wasabisys.com` |
+| **Linode Object Storage** | ✅ Yes | `https://us-east-1.linodeobjects.com` |
+| **Backblaze B2** | ✅ Yes | `https://s3.us-west-001.backblazeb2.com` |
+| **Cloudflare R2** | ✅ Yes | `https://account-id.r2.cloudflarestorage.com` |
+| **Any S3-compatible** | ✅ Yes | Set via `AWS_S3_ENDPOINT_URL` |
+
+All endpoint URLs are automatically parsed and added to the CSP `img-src` directive along with bucket-based subdomain formats.
 
 ---
 
@@ -649,3 +766,33 @@ For longer expiration times or public access, consider setting ACLs to public:
 - S3: `AWS_DEFAULT_ACL=public-read`
 - GCS: `GS_DEFAULT_ACL=publicRead`
 - Azure: Use public containers or connection strings
+
+---
+
+## Security Best Practices
+
+1. **Never commit credentials** to version control
+2. **Use environment variables** or secret management services
+3. **Use private ACLs** for sensitive content
+4. **Enable HTTPS** for all cloud storage endpoints
+5. **Rotate access keys** regularly
+6. **Use IAM roles** instead of access keys when running on cloud platforms
+7. **Enable versioning** on your cloud storage buckets
+8. **Set up proper CORS policies** if accessing files from browsers
+9. **Enable bucket encryption** at rest (AWS SSE, Azure Storage Service Encryption, GCS CMEK)
+10. **Use S3 Transfer Acceleration** for faster uploads from distant geographic regions
+11. **Monitor storage access logs** for suspicious activity
+
+---
+
+## Additional Resources
+
+- [django-storages Documentation](https://django-storages.readthedocs.io/)
+- [Amazon S3 Documentation](https://docs.aws.amazon.com/s3/)
+- [Azure Blob Storage Documentation](https://docs.microsoft.com/en-us/azure/storage/blobs/)
+- [Google Cloud Storage Documentation](https://cloud.google.com/storage/docs)
+- [MinIO Documentation](https://min.io/docs/minio/linux/index.html)
+- [DigitalOcean Spaces Documentation](https://docs.digitalocean.com/products/spaces/)
+- [Wasabi Documentation](https://wasabi-support.zendesk.com/hc/en-us)
+- [Linode Object Storage Documentation](https://www.linode.com/docs/products/storage/object-storage/)
+- [Backblaze B2 Documentation](https://www.backblaze.com/b2/docs/)
