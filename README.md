@@ -51,7 +51,10 @@ docker compose -f docker/docker-compose.yml logs -f
 
 ## 🌏 Environment Variables
 
-MemeLord takes various environment variables to configure `settings.py`:
+> [!TIP]
+> Please refer to the [env.example](https://github.com/l4rm4nd/MemeLord/blob/main/docker/env.example) for more details.
+
+MemeLord is configured using various environment variables:
 
 | Variable                         | Description                                                                                                     | Default                    | Optional/Mandatory  |
 |----------------------------------|-----------------------------------------------------------------------------------------------------------------|----------------------------|---------------------|
@@ -100,7 +103,6 @@ MemeLord takes various environment variables to configure `settings.py`:
 | `SFTP_STORAGE_USERNAME`          | SFTP username (required when `STORAGE_BACKEND=sftp`).                                                          | `None`                     | Optional            |
 | `SFTP_STORAGE_PASSWORD`          | SFTP password (required when `STORAGE_BACKEND=sftp`).                                                          | `None`                     | Optional            |
 | `DROPBOX_OAUTH2_TOKEN`           | Dropbox OAuth2 token (required when `STORAGE_BACKEND=dropbox`).                                                | `None`                     | Optional            |
-| `FTP_STORAGE_LOCATION`           | FTP storage location URL (required when `STORAGE_BACKEND=ftp`).                                                | `None`                     | Optional            |
 | `REDIS_HOST`                     | Redis server hostname for session storage and caching. When set, enables cloud-native Redis sessions. See [STORAGE_BACKENDS.md](STORAGE_BACKENDS.md) for details. | `None`                     | Optional            |
 | `REDIS_PORT`                     | Redis server port.                                                                                              | `6379`                     | Optional            |
 | `REDIS_DB`                       | Redis database number.                                                                                          | `0`                        | Optional            |
