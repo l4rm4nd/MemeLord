@@ -16,9 +16,7 @@ You can configure which storage backend to use through environment variables.
 > [!WARNING]
 > Only the `local` and `s3` storage backends were tested and confirmed to be working.
 > 
-> Other backends should work but are subject to a proper `django-storages` configuration.
->
-> **FTP storage backend has been removed** as it is not recommended for production use and lacks proper security features.
+> Other backends should work but are subject to a proper `django-storages` configuration. You may have to tweak the CSP whitelist using `CSP_IMG_SRC_EXTRA`.
 
 ## Configuration
 

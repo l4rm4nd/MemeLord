@@ -250,13 +250,6 @@ elif STORAGE_BACKEND == 'dropbox':
     # No additional CSP configuration needed
     pass
 
-elif STORAGE_BACKEND == 'ftp':
-    # FTP files are retrieved by Django and served through Django views
-    # Optional: If you have nginx serving the same FTP directory via HTTP
-    FTP_CUSTOM_DOMAIN = os.environ.get('FTP_CUSTOM_DOMAIN')
-    if FTP_CUSTOM_DOMAIN:
-        IMG_SRC_LIST.append(f"https://{FTP_CUSTOM_DOMAIN}")
-
 CSP_IMG_SRC_EXTRA = os.environ.get('CSP_IMG_SRC_EXTRA', '')
 if CSP_IMG_SRC_EXTRA: 
     extra_domains = [domain.strip() for domain in CSP_IMG_SRC_EXTRA.split(',') if domain.strip()] 
@@ -484,7 +477,7 @@ MAX_UPLOAD_SIZE_MB = int(os.environ.get('MAX_UPLOAD_SIZE_MB', '10')) * 1024 * 10
 # =============================================================================
 # IMPORTANT: This must be set BEFORE MEDIA_URL and MEDIA_ROOT
 # Configure storage backend via STORAGE_BACKEND environment variable
-# Supported backends: local, s3, azure, gcs, sftp, dropbox, ftp
+# Supported backends: local, s3, azure, gcs, sftp, dropbox
 # Default: local (filesystem storage)
 
 STORAGE_BACKEND = os.environ.get('STORAGE_BACKEND', 'local').lower()
@@ -653,23 +646,6 @@ elif STORAGE_BACKEND == 'dropbox':
     }
     
     DEFAULT_FILE_STORAGE = 'storages.backends.dropbox.DropBoxStorage'
-    MEDIA_URL = "/media/"
-    MEDIA_ROOT = BASE_DIR / "media"
-
-elif STORAGE_BACKEND == 'ftp':
-    # FTP Storage
-    FTP_STORAGE_LOCATION = os.environ.get('FTP_STORAGE_LOCATION')
-    
-    STORAGES = {
-        "default": {
-            "BACKEND": "storages.backends.ftp.FTPStorage",
-        },
-        "staticfiles": {
-            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
-        },
-    }
-    
-    DEFAULT_FILE_STORAGE = 'storages.backends.ftp.FTPStorage'
     MEDIA_URL = "/media/"
     MEDIA_ROOT = BASE_DIR / "media"
 

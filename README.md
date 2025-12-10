@@ -87,7 +87,7 @@ MemeLord is configured using various environment variables:
 | `POSTGRES_PASSWORD`              | PostgreSQL database password.                                                                                   | `memelord`                 | Optional            |
 | `POSTGRES_DB`                    | PostgreSQL database name.                                                                                       | `memelord`                 | Optional            |
 | `MAX_UPLOAD_SIZE_MB`             | Maximum file upload size in megabytes.                                                                          | `10`                       | Optional            |
-| `STORAGE_BACKEND`                | Storage backend to use. Options: `local`, `s3`, `azure`, `gcs`, `sftp`, `dropbox`, `ftp`. See [STORAGE_BACKENDS.md](STORAGE_BACKENDS.md) for detailed configuration. | `local`                    | Optional            |
+| `STORAGE_BACKEND`                | Storage backend to use. Options: `local`, `s3`, `azure`, `gcs`, `sftp`, `dropbox`. See [STORAGE_BACKENDS.md](STORAGE_BACKENDS.md) for detailed configuration. | `local`                    | Optional            |
 | `AWS_ACCESS_KEY_ID`              | AWS/S3 access key ID (required when `STORAGE_BACKEND=s3`).                                                     | `None`                     | Optional            |
 | `AWS_SECRET_ACCESS_KEY`          | AWS/S3 secret access key (required when `STORAGE_BACKEND=s3`).                                                 | `None`                     | Optional            |
 | `AWS_STORAGE_BUCKET_NAME`        | S3 bucket name (required when `STORAGE_BACKEND=s3`).                                                           | `None`                     | Optional            |
@@ -109,7 +109,7 @@ MemeLord is configured using various environment variables:
 | `REDIS_PASSWORD`                 | Redis server password (if authentication is enabled).                                                           | `None`                     | Optional            |
 
 > [!NOTE]
-> For detailed storage backend configuration including all available options for S3, Azure, GCS, SFTP, Dropbox, and FTP, see [STORAGE_BACKENDS.md](STORAGE_BACKENDS.md).
+> For detailed storage backend configuration including all available options, please see [STORAGE_BACKENDS.md](STORAGE_BACKENDS.md).
 
 > [!TIP]
 > **Cloud-Native Deployments:** For horizontally scaled deployments (Kubernetes, Docker Swarm, ECS, etc.), configure Redis sessions by setting `REDIS_HOST` to enable shared session storage across all application instances. See [STORAGE_BACKENDS.md](STORAGE_BACKENDS.md) for Redis configuration examples.
