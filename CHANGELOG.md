@@ -1,3 +1,10 @@
+## [1.3.0](https://github.com/l4rm4nd/MemeLord/compare/v1.2.2...v1.3.0) (2025-12-10)
+
+
+### Features
+
+* remove ftp storage provider and improve csp whitelisting ([79d7b8e](https://github.com/l4rm4nd/MemeLord/commit/79d7b8e759b5d0534a05b184c368f6d1493352db))
+
 ## [1.2.2](https://github.com/l4rm4nd/MemeLord/compare/v1.2.1...v1.2.2) (2025-12-09)
 
 
@@ -26,11 +33,4 @@
 ### Features
 
 * add statistics endpoint; improve responsive ui ([0099e0c](https://github.com/l4rm4nd/MemeLord/commit/0099e0ca2facccf698cdc06efcfd799464dd164c))
-
-## [1.0.18](https://github.com/l4rm4nd/MemeLord/compare/v1.0.17...v1.0.18) (2025-12-08)
-
-
-### Bug Fixes
-
-* meme ordering (latest > oldest) ([7700b41](https://github.com/l4rm4nd/MemeLord/commit/7700b4169329f28dd42111c4f740a53719ed729f))
 
