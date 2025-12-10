@@ -62,8 +62,7 @@ STORAGE_BACKEND=s3
 AWS_ACCESS_KEY_ID=minioadmin
 AWS_SECRET_ACCESS_KEY=minioadmin
 AWS_STORAGE_BUCKET_NAME=memelord
-AWS_S3_ENDPOINT_URL=http://localhost:9000
-AWS_S3_REGION_NAME=us-east-1
+AWS_S3_ENDPOINT_URL=http://127.0.0.1:9000
 ```
 
 ### Example for DigitalOcean Spaces:
