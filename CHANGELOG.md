@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/l4rm4nd/MemeLord/compare/v1.3.0...v1.3.1) (2025-12-10)
+
+
+### Bug Fixes
+
+* remove ftp storage and update documentation ([682b478](https://github.com/l4rm4nd/MemeLord/commit/682b478f9122bc9e4cc86c7e7b2807b47c7ffd4c))
+
 ## [1.3.0](https://github.com/l4rm4nd/MemeLord/compare/v1.2.2...v1.3.0) (2025-12-10)
 
 
@@ -26,11 +33,4 @@
 
 * optional redis session cache ([00cd568](https://github.com/l4rm4nd/MemeLord/commit/00cd568fbcdc84322bbe17fe8ef572720ad0e7cc))
 * support for s3 and more storage providers ([a436e61](https://github.com/l4rm4nd/MemeLord/commit/a436e61f7698fb5010821bf5e3cb58406fea14a5))
-
-## [1.1.0](https://github.com/l4rm4nd/MemeLord/compare/v1.0.18...v1.1.0) (2025-12-08)
-
-
-### Features
-
-* add statistics endpoint; improve responsive ui ([0099e0c](https://github.com/l4rm4nd/MemeLord/commit/0099e0ca2facccf698cdc06efcfd799464dd164c))
 
