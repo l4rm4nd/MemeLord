@@ -32,6 +32,9 @@
 
 ## 🔥 Installation
 
+> [!TIP]
+> Please refer to the [wiki](https://github.com/l4rm4nd/MemeLord/wiki/01-%E2%80%90-Installation) for more details.
+
 ````bash
 # create volume dirs for persistence
 mkdir -p ./volume-data/database ./volume-data/media 
@@ -45,9 +48,6 @@ docker compose -f docker/docker-compose.yml up -d
 # retrieve login credentials from container logs
 docker compose -f docker/docker-compose.yml logs -f
 ````
-
-> [!TIP]
-> An official Unraid app exists in the store. See [wiki](https://github.com/l4rm4nd/MemeLord/wiki/01-%E2%80%90-Installation#unraid-installation).
 
 ## 🌏 Environment Variables
 
