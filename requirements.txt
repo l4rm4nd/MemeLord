@@ -28,3 +28,4 @@ azure-storage-blob==12.27.1
 google-cloud-storage==3.6.0
 
 # APP SPECIFIC
+Pillow==12.1.0

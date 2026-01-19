@@ -6,6 +6,7 @@
         class="ratio ratio-1x1 meme-card-body overflow-hidden"
         data-meme-open
         data-full-url="{{ media.file.url }}"
+        data-thumb-url="{% if media.thumbnail %}{{ media.thumbnail.url }}{% else %}{{ media.file.url }}{% endif %}"
         data-media-type="{{ media.media_type }}"
         data-detail-url="{% url 'myapp:meme_detail' media.pk %}"
         data-title="{{ media.title|default:'Untitled meme'|escapejs }}"
@@ -14,9 +15,11 @@
         data-tags='[{% for tag in media.tags.all %}{"name":"{{ tag.name|escapejs }}","url":"?tag={{ tag.slug }}"}{% if not forloop.last %},{% endif %}{% endfor %}]'
       >
         {% if media.media_type == 'image' %}
-          <img src="{{ media.file.url }}"
-               class="w-100 h-100 object-fit-cover"
-               alt="{{ media.title|default:'Meme' }}">
+          <img src="{% if media.thumbnail %}{{ media.thumbnail.url }}{% else %}{{ media.file.url }}{% endif %}"
+               data-src="{{ media.file.url }}"
+               class="w-100 h-100 object-fit-cover lazy-img"
+               alt="{{ media.title|default:'Meme' }}"
+               loading="lazy">
         {% else %}
           <video class="w-100 h-100 object-fit-cover" muted preload="metadata">
             <source src="{{ media.file.url }}">

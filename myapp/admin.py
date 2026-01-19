@@ -54,7 +54,7 @@ class MediaAdmin(admin.ModelAdmin):
     ordering = ("-created_at",)
     list_display = (
         "id",
-        "thumbnail",
+        "thumbnail_preview",
         "title",
         "media_type",
         "uploader",
@@ -104,15 +104,25 @@ class MediaAdmin(admin.ModelAdmin):
         return qs.prefetch_related("tags", "uploader", "album")
 
     @admin.display(description="Preview")
-    def thumbnail(self, obj):
+    def thumbnail_preview(self, obj):
         """Small preview in the list view."""
         if not obj.file:
             return "—"
 
         if obj.media_type == Media.MediaType.IMAGE:
+            # Use thumbnail if available and has a file, otherwise use full image
+            try:
+                if obj.thumbnail and obj.thumbnail.name:
+                    img_url = obj.thumbnail.url
+                else:
+                    img_url = obj.file.url
+            except Exception:
+                # Fallback to original file if thumbnail fails
+                img_url = obj.file.url
+            
             return format_html(
                 '<img src="{}" style="max-height: 60px; border-radius: 4px;" />',
-                obj.file.url,
+                img_url,
             )
         elif obj.media_type == Media.MediaType.VIDEO:
             return "🎥"
@@ -128,6 +138,24 @@ class MediaAdmin(admin.ModelAdmin):
         """Bigger preview on the detail page."""
         if not obj.file:
             return "No file"
+        
+        # Check if file actually exists in storage
+        try:
+            if not obj.file.storage.exists(obj.file.name):
+                return format_html(
+                    '<div style="color: #dc3545; padding: 10px; border: 1px solid #dc3545; border-radius: 4px;">'
+                    '⚠️ File missing from storage: {}'
+                    '</div>',
+                    obj.file.name
+                )
+        except Exception as e:
+            return format_html(
+                '<div style="color: #ffc107; padding: 10px; border: 1px solid #ffc107; border-radius: 4px;">'
+                '⚠️ Could not verify file existence: {}'
+                '</div>',
+                str(e)
+            )
+        
         if obj.media_type == Media.MediaType.IMAGE:
             return format_html(
                 '<img src="{}" style="max-width: 100%; max-height: 400px; border-radius: 6px;" />',
@@ -160,6 +188,8 @@ class MediaAdmin(admin.ModelAdmin):
             files_added = 0
             
             # Add media files preserving their original paths
+            # Note: Thumbnails are not backed up as they can be regenerated with:
+            # python manage.py generate_thumbnails
             for media in queryset:
                 if not media.file:
                     continue

@@ -25,6 +25,9 @@ perform_migrations() {
     python manage.py migrate myapp
     python manage.py collectstatic --no-input --verbosity=0
 
+    echo "[~] Generating thumbnails for images without thumbnails"
+    python manage.py generate_thumbnails
+
     if [ -z "$DB_INITIALIZED" ]; then
         echo "------------------------------------"
         admin_password=$(generate_random_string)
@@ -50,6 +53,11 @@ fi
 
 # Perform database migrations
 perform_migrations
+
+# Start Django-Celery-Beat
+#echo "[TASK] Starting Celery worker and beat"
+#celery -A myproject worker -l info --detach
+#celery -A myproject beat -l info --detach --scheduler django_celery_beat.schedulers:DatabaseScheduler
 
 # Spawn the web server
 echo "[~] Spawning the application server"

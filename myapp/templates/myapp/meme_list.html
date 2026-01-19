@@ -319,7 +319,6 @@
     });
   })();
 
-// === Smart Lightbox with Infinite Scroll Integration ===
 // === Smart Lightbox with Infinite Scroll Integration and Tags ===
 (function() {
   const lightbox = document.getElementById("meme-lightbox");
@@ -335,6 +334,10 @@
   let items = [];
   let currentIndex = -1;
   let isLoadingMore = false;
+  
+  // Preload cache for full-size images
+  const preloadCache = new Map();
+  const PRELOAD_AHEAD = 4; // Number of images to preload ahead
 
   // Access infinite scroll state from the other script
   let infiniteScrollState = {
@@ -362,6 +365,42 @@
 
   function decodeText(t) { 
     return t ? t.replace(/\\u[\dA-Fa-f]{4}/g, m => String.fromCharCode(parseInt(m.slice(2), 16))) : ""; 
+  }
+  
+  /**
+   * Preload full-size images ahead of current position
+   */
+  function preloadAhead() {
+    for (let i = 1; i <= PRELOAD_AHEAD; i++) {
+      const idx = currentIndex + i;
+      if (idx < items.length) {
+        const el = items[idx];
+        const type = el.dataset.mediaType || "image";
+        
+        // Only preload images, not videos
+        if (type === "image") {
+          const fullUrl = el.dataset.fullUrl;
+          
+          // Skip if already preloaded or loading
+          if (preloadCache.has(fullUrl)) {
+            continue;
+          }
+          
+          // Mark as loading
+          preloadCache.set(fullUrl, 'loading');
+          
+          // Preload the image
+          const img = new Image();
+          img.onload = () => {
+            preloadCache.set(fullUrl, 'loaded');
+          };
+          img.onerror = () => {
+            preloadCache.delete(fullUrl); // Remove from cache on error
+          };
+          img.src = fullUrl;
+        }
+      }
+    }
   }
 
   function scaleMedia(media) {
@@ -448,6 +487,8 @@
       img.onload = () => {
         mediaContainer.classList.remove("loading");
         scaleMedia(img);
+        // Preload next images after current one loads
+        preloadAhead();
       };
       img.src = url;
       img.alt = title;

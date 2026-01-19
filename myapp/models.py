@@ -72,6 +72,7 @@ class Media(TimeStampedModel):
     )
     title = models.CharField(max_length=150, blank=True)
     file = models.FileField(upload_to=meme_upload_to)
+    thumbnail = models.ImageField(upload_to=meme_upload_to, blank=True, null=True)
     media_type = models.CharField(
         max_length=10,
         choices=MediaType.choices,
