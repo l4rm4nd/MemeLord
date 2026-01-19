@@ -335,9 +335,10 @@
   let currentIndex = -1;
   let isLoadingMore = false;
   
-  // Preload cache for full-size images
+  // Preload cache for full-size images with metadata
   const preloadCache = new Map();
-  const PRELOAD_AHEAD = 4; // Number of images to preload ahead
+  const PRELOAD_COUNT = 4; // Number of images to preload in each direction (next/previous)
+  const DEBUG_PRELOAD = {% if debug %}true{% else %}false{% endif %}; // Controlled by Django DEBUG setting
 
   // Access infinite scroll state from the other script
   let infiniteScrollState = {
@@ -368,38 +369,100 @@
   }
   
   /**
-   * Preload full-size images ahead of current position
+   * Preload images bidirectionally (both next and previous)
+   * Preloads up to PRELOAD_COUNT images in each direction
+   * Browser will automatically reuse cached images when they're displayed
    */
-  function preloadAhead() {
-    for (let i = 1; i <= PRELOAD_AHEAD; i++) {
+  function preloadImages() {
+    if (DEBUG_PRELOAD) {
+      console.log(`[Preload] Starting from index ${currentIndex}, total items: ${items.length}`);
+    }
+    
+    const toPreload = new Set();
+    
+    // Preload next images (forward direction)
+    for (let i = 1; i <= PRELOAD_COUNT; i++) {
       const idx = currentIndex + i;
       if (idx < items.length) {
-        const el = items[idx];
-        const type = el.dataset.mediaType || "image";
-        
-        // Only preload images, not videos
-        if (type === "image") {
-          const fullUrl = el.dataset.fullUrl;
-          
-          // Skip if already preloaded or loading
-          if (preloadCache.has(fullUrl)) {
-            continue;
-          }
-          
-          // Mark as loading
-          preloadCache.set(fullUrl, 'loading');
-          
-          // Preload the image
-          const img = new Image();
-          img.onload = () => {
-            preloadCache.set(fullUrl, 'loaded');
-          };
-          img.onerror = () => {
-            preloadCache.delete(fullUrl); // Remove from cache on error
-          };
-          img.src = fullUrl;
-        }
+        toPreload.add(idx);
       }
+    }
+    
+    // Preload previous images (backward direction)
+    for (let i = 1; i <= PRELOAD_COUNT; i++) {
+      const idx = currentIndex - i;
+      if (idx >= 0) {
+        toPreload.add(idx);
+      }
+    }
+    
+    if (DEBUG_PRELOAD) {
+      console.log(`[Preload] Will check indices:`, Array.from(toPreload).sort((a, b) => a - b));
+    }
+    
+    // Process all items to preload
+    toPreload.forEach(idx => {
+      const el = items[idx];
+      const type = el.dataset.mediaType || "image";
+      
+      // Only preload images, not videos (videos are too large)
+      if (type === "image") {
+        const fullUrl = el.dataset.fullUrl;
+        
+        // Check cache status
+        const cacheStatus = preloadCache.get(fullUrl);
+        
+        if (cacheStatus === 'loaded') {
+          if (DEBUG_PRELOAD) {
+            console.log(`[Preload] ✓ Already loaded: index ${idx} (${fullUrl.substring(fullUrl.lastIndexOf('/') + 1)})`);
+          }
+          return; // Already loaded, browser will reuse
+        }
+        
+        if (cacheStatus === 'loading') {
+          if (DEBUG_PRELOAD) {
+            console.log(`[Preload] ⏳ Already loading: index ${idx}`);
+          }
+          return; // Already being loaded
+        }
+        
+        // Start preloading this image
+        if (DEBUG_PRELOAD) {
+          console.log(`[Preload] ⬇️ Starting preload: index ${idx} (${fullUrl.substring(fullUrl.lastIndexOf('/') + 1)})`);
+        }
+        
+        preloadCache.set(fullUrl, 'loading');
+        
+        const img = new Image();
+        const startTime = performance.now();
+        
+        img.onload = () => {
+          const loadTime = (performance.now() - startTime).toFixed(2);
+          preloadCache.set(fullUrl, 'loaded');
+          
+          if (DEBUG_PRELOAD) {
+            console.log(`[Preload] ✅ Loaded: index ${idx} in ${loadTime}ms (cached for reuse)`);
+          }
+        };
+        
+        img.onerror = () => {
+          preloadCache.delete(fullUrl);
+          if (DEBUG_PRELOAD) {
+            console.error(`[Preload] ❌ Failed to load: index ${idx}`);
+          }
+        };
+        
+        // Setting src triggers the browser to fetch and cache the image
+        img.src = fullUrl;
+      } else if (DEBUG_PRELOAD) {
+        console.log(`[Preload] ⏭️ Skipping video at index ${idx}`);
+      }
+    });
+    
+    if (DEBUG_PRELOAD) {
+      const loaded = Array.from(preloadCache.entries()).filter(([_, status]) => status === 'loaded').length;
+      const loading = Array.from(preloadCache.entries()).filter(([_, status]) => status === 'loading').length;
+      console.log(`[Preload] Cache status: ${loaded} loaded, ${loading} loading`);
     }
   }
 
@@ -483,13 +546,36 @@
       video.addEventListener("loadeddata", finalize);
       video.addEventListener("canplay", () => scaleMedia(video));
     } else {
+      // Check if image is already in cache
+      const cacheStatus = preloadCache.get(url);
+      const isCached = cacheStatus === 'loaded';
+      
+      if (DEBUG_PRELOAD) {
+        console.log(`[Render] Displaying index ${currentIndex}: ${isCached ? '🚀 FROM CACHE' : '⏳ Loading now'}`);
+      }
+      
       const img = new Image();
+      const renderStartTime = performance.now();
+      
       img.onload = () => {
+        const renderTime = (performance.now() - renderStartTime).toFixed(2);
         mediaContainer.classList.remove("loading");
         scaleMedia(img);
-        // Preload next images after current one loads
-        preloadAhead();
+        
+        // Mark as loaded in cache if not already
+        if (!isCached) {
+          preloadCache.set(url, 'loaded');
+        }
+        
+        if (DEBUG_PRELOAD) {
+          console.log(`[Render] ✅ Displayed in ${renderTime}ms ${isCached ? '(instant from cache)' : '(fresh load)'}`);
+        }
+        
+        // Trigger preloading of surrounding images after current image loads
+        preloadImages();
       };
+      
+      // Browser will use cached version if available (near-instant)
       img.src = url;
       img.alt = title;
       mediaContainer.appendChild(img);
@@ -515,7 +601,9 @@
     try {
       tags = JSON.parse(tagsJson);
     } catch (e) {
-      console.error("Error parsing tags:", e);
+      if (DEBUG_PRELOAD) {
+        console.error("Error parsing tags:", e);
+      }
     }
 
     if (tags && tags.length > 0) {
@@ -651,6 +739,89 @@
       renderMedia();
     }
   };
+  
+  // Expose debug utilities for console testing/validation
+  window.lightboxDebug = {
+    getCacheStatus: function() {
+      const status = {
+        total: preloadCache.size,
+        loaded: 0,
+        loading: 0,
+        details: []
+      };
+      
+      preloadCache.forEach((state, url) => {
+        if (state === 'loaded') status.loaded++;
+        if (state === 'loading') status.loading++;
+        status.details.push({
+          url: url.substring(url.lastIndexOf('/') + 1),
+          status: state
+        });
+      });
+      
+      console.table(status.details);
+      console.log(`Summary: ${status.loaded} loaded, ${status.loading} loading, ${status.total} total`);
+      return status;
+    },
+    
+    getCurrentIndex: function() {
+      return currentIndex;
+    },
+    
+    getTotalItems: function() {
+      return items.length;
+    },
+    
+    getPreloadRange: function() {
+      const range = {
+        current: currentIndex,
+        previous: [],
+        next: []
+      };
+      
+      for (let i = 1; i <= PRELOAD_COUNT; i++) {
+        if (currentIndex - i >= 0) {
+          range.previous.push(currentIndex - i);
+        }
+        if (currentIndex + i < items.length) {
+          range.next.push(currentIndex + i);
+        }
+      }
+      
+      console.log('Current:', range.current);
+      console.log('Will preload previous indices:', range.previous);
+      console.log('Will preload next indices:', range.next);
+      return range;
+    },
+    
+    clearCache: function() {
+      const size = preloadCache.size;
+      preloadCache.clear();
+      console.log(`Cleared ${size} cached images`);
+    },
+    
+    help: function() {
+      console.log(`
+Lightbox Debug Utilities:
+========================
+lightboxDebug.getCacheStatus()   - Show all cached images
+lightboxDebug.getCurrentIndex()  - Get current meme index
+lightboxDebug.getTotalItems()    - Get total number of items
+lightboxDebug.getPreloadRange()  - Show what will be preloaded
+lightboxDebug.clearCache()       - Clear the preload cache
+lightboxDebug.help()             - Show this help message
+
+Set DEBUG_PRELOAD = true in code to see detailed console logs.
+      `);
+    }
+  };
+  
+  // Log initialization
+  if (DEBUG_PRELOAD) {
+    console.log('[Lightbox] Initialized with bidirectional preloading');
+    console.log(`[Lightbox] Will preload ${PRELOAD_COUNT} images in each direction (total: ${PRELOAD_COUNT * 2} images)`);
+    console.log('[Lightbox] Type "lightboxDebug.help()" in console for debug utilities');
+  }
 })();
 </script>
 

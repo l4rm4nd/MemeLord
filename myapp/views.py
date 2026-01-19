@@ -77,6 +77,7 @@ def meme_list(request):
     context = {
         "page_obj": page_obj,
         "current_tag": current_tag,
+        "debug": settings.DEBUG,
     }
     return render(request, "myapp/meme_list.html", context)
 

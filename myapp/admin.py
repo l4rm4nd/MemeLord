@@ -7,6 +7,7 @@ from django.db.models import Count
 from django.http import HttpResponse
 from django.utils.html import format_html
 from django.core.management import call_command
+from django.utils import timezone
 
 from .models import Tag, Album, Media, Comment
 
@@ -168,18 +169,40 @@ class MediaAdmin(admin.ModelAdmin):
             )
         return "Unsupported file type"
 
-    @admin.action(description="Download selected media as ZIP (with JSON metadata)")
+    @admin.action(description="Download selected media as ZIP (with all fixtures)")
     def download_media_as_zip(self, request, queryset):
         """
-        Create a ZIP file containing all selected media files plus a JSON metadata file.
+        Create a comprehensive ZIP file containing:
+        1. All selected media files (images/videos)
+        2. Complete Django fixtures in JSON format:
+           - Users (uploaders, comment authors)
+           - Groups (if users belong to groups)
+           - Tags (associated with media)
+           - Media records (metadata)
+           - Comments (on media)
+        3. README with import instructions
+        
         Preserves the original folder structure so files can be extracted directly to MEDIA_ROOT.
         Works with all storage backends (local, S3, Azure, GCS, SFTP, Dropbox, FTP).
+        
+        To restore:
+        1. Extract media files to MEDIA_ROOT
+        2. Run: python manage.py loaddata fixtures/users.json
+        3. Run: python manage.py loaddata fixtures/groups.json
+        4. Run: python manage.py loaddata fixtures/tags.json
+        5. Run: python manage.py loaddata fixtures/media.json
+        6. Run: python manage.py loaddata fixtures/comments.json
+        7. Run: python manage.py generate_thumbnails (if needed)
         """
         from django.conf import settings
+        from django.contrib.auth import get_user_model
+        from django.contrib.auth.models import Group
         import logging
+        import json
         
         logger = logging.getLogger(__name__)
         storage_backend = getattr(settings, 'STORAGE_BACKEND', 'local')
+        User = get_user_model()
         
         # Create an in-memory ZIP file
         zip_buffer = BytesIO()
@@ -187,20 +210,17 @@ class MediaAdmin(admin.ModelAdmin):
         with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
             files_added = 0
             
-            # Add media files preserving their original paths
-            # Note: Thumbnails are not backed up as they can be regenerated with:
-            # python manage.py generate_thumbnails
+            # ============ STEP 1: Add media files ============
             for media in queryset:
                 if not media.file:
                     continue
                 
                 try:
                     # Use the same path structure as stored in the database
-                    # e.g., "memes/user_1/filename.jpg"
-                    zip_filename = media.file.name
+                    # e.g., "media/memes/user_1/filename.jpg"
+                    zip_filename = f"media/{media.file.name}"
                     
                     # Read file content from storage (works for all backends)
-                    # This opens the file from whatever storage backend is configured
                     with media.file.storage.open(media.file.name, 'rb') as file_obj:
                         file_content = file_obj.read()
                     
@@ -211,7 +231,6 @@ class MediaAdmin(admin.ModelAdmin):
                     logger.debug(f"Added {zip_filename} to ZIP from {storage_backend} storage")
                     
                 except Exception as e:
-                    # Log error but continue with other files
                     logger.error(f"Error adding {media.title or media.id} to ZIP: {str(e)}")
                     self.message_user(
                         request,
@@ -219,15 +238,169 @@ class MediaAdmin(admin.ModelAdmin):
                         level=messages.WARNING
                     )
             
-            # Add JSON metadata
-            json_data = serializers.serialize(
+            # ============ STEP 2: Gather all related objects ============
+            
+            # Collect all related users
+            user_ids = set()
+            # Users from media uploaders
+            user_ids.update(queryset.values_list('uploader_id', flat=True))
+            # Users from comment authors
+            comment_author_ids = Comment.objects.filter(media__in=queryset).values_list('author_id', flat=True)
+            user_ids.update(comment_author_ids)
+            
+            users = User.objects.filter(id__in=user_ids)
+            
+            # Collect all groups for these users
+            group_ids = set()
+            for user in users:
+                group_ids.update(user.groups.values_list('id', flat=True))
+            groups = Group.objects.filter(id__in=group_ids)
+            
+            # Collect all tags
+            tag_ids = set()
+            for media in queryset:
+                tag_ids.update(media.tags.values_list('id', flat=True))
+            tags = Tag.objects.filter(id__in=tag_ids)
+            
+            # Collect all comments
+            comments = Comment.objects.filter(media__in=queryset)
+            
+            # ============ STEP 3: Serialize to JSON fixtures ============
+            # Order: groups -> users -> tags -> media -> comments
+            
+            # Serialize groups (no dependencies)
+            groups_data = serializers.serialize(
                 'json',
-                queryset,
-                use_natural_foreign_keys=True,
-                use_natural_primary_keys=False,
+                groups,
                 indent=2
             )
-            zip_file.writestr('metadata.json', json_data)
+            zip_file.writestr('fixtures/groups.json', groups_data)
+            
+            # Serialize users (depends on groups for M2M relationship)
+            users_data = serializers.serialize(
+                'json',
+                users,
+                indent=2,
+                fields=('username', 'email', 'first_name', 'last_name', 
+                       'is_staff', 'is_active', 'date_joined', 'groups')
+            )
+            zip_file.writestr('fixtures/users.json', users_data)
+            
+            # Serialize tags (no dependencies)
+            tags_data = serializers.serialize(
+                'json',
+                tags,
+                indent=2
+            )
+            zip_file.writestr('fixtures/tags.json', tags_data)
+            
+            # Serialize media (depends on users)
+            media_data = serializers.serialize(
+                'json',
+                queryset,
+                indent=2
+            )
+            zip_file.writestr('fixtures/media.json', media_data)
+            
+            # Serialize comments (depends on media and users)
+            comments_data = serializers.serialize(
+                'json',
+                comments,
+                indent=2
+            )
+            zip_file.writestr('fixtures/comments.json', comments_data)
+            
+            # ============ STEP 4: Create README ============
+            readme_content = f"""# MemeLoard Backup Archive
+Generated: {timezone.now().strftime('%Y-%m-%d %H:%M:%S')}
+Storage Backend: {storage_backend}
+
+## Contents
+- {files_added} media file(s) in media/ directory
+- {users.count()} user(s)
+- {groups.count()} group(s)
+- {tags.count()} tag(s)
+- {queryset.count()} media record(s)
+- {comments.count()} comment(s)
+
+## Restore Instructions
+
+### 1. Extract Media Files
+Extract the contents of this archive. The media files are in the `media/` directory
+and should be placed in your MEDIA_ROOT directory.
+
+```bash
+# Example: Extract to your Django project
+unzip media_backup.zip
+cp -r media/* /path/to/your/project/media/
+```
+
+### 2. Load Fixtures (in order)
+IMPORTANT: Load fixtures in the correct order to respect foreign key dependencies.
+
+```bash
+# Navigate to your Django project directory
+cd /path/to/your/project
+
+# Load in this specific order (order matters!):
+python manage.py loaddata fixtures/groups.json       # 1. No dependencies
+python manage.py loaddata fixtures/users.json        # 2. Depends on groups (M2M)
+python manage.py loaddata fixtures/tags.json         # 3. No dependencies
+python manage.py loaddata fixtures/media.json        # 4. Depends on users (uploader FK)
+python manage.py loaddata fixtures/comments.json     # 5. Depends on media & users (FKs)
+```
+
+### 3. Generate Thumbnails (optional)
+If thumbnails were not included or need regeneration:
+
+```bash
+python manage.py generate_thumbnails
+```
+
+## Notes
+- User passwords are NOT included in this backup for security reasons
+- You may need to reset passwords: `python manage.py changepassword <username>`
+- Ensure your storage backend settings match the original configuration
+- Check file permissions after extraction
+
+## Troubleshooting
+
+### Foreign Key Errors
+If you get foreign key constraint errors during import:
+1. Make sure you load fixtures in the exact order specified above
+2. Check that your database is empty or doesn't have conflicting IDs
+3. Consider using `--ignorenonexistent` flag if some models don't exist
+
+### Missing Files
+If media files are missing after import:
+1. Verify MEDIA_ROOT setting matches extraction location
+2. Check file permissions (should be readable by web server)
+3. Verify storage backend configuration
+
+### Duplicate Key Errors
+If importing into existing database with overlapping IDs:
+1. Consider using natural keys instead
+2. Or clear existing data first (CAUTION: data loss)
+3. Or manually adjust fixture IDs
+"""
+            zip_file.writestr('README.md', readme_content)
+            
+            # ============ STEP 5: Create summary JSON ============
+            summary = {
+                'export_date': timezone.now().isoformat(),
+                'storage_backend': storage_backend,
+                'statistics': {
+                    'media_files': files_added,
+                    'users': users.count(),
+                    'groups': groups.count(),
+                    'tags': tags.count(),
+                    'media_records': queryset.count(),
+                    'comments': comments.count(),
+                },
+                'user_list': list(users.values_list('username', flat=True)),
+                'tag_list': list(tags.values_list('name', flat=True)),
+            }
+            zip_file.writestr('summary.json', json.dumps(summary, indent=2))
         
         if files_added == 0:
             self.message_user(
@@ -240,11 +413,13 @@ class MediaAdmin(admin.ModelAdmin):
         # Prepare the response
         zip_buffer.seek(0)
         response = HttpResponse(zip_buffer.read(), content_type='application/zip')
-        response['Content-Disposition'] = 'attachment; filename="media_backup.zip"'
+        response['Content-Disposition'] = 'attachment; filename="memeloard_backup.zip"'
         
         self.message_user(
             request,
-            f"Successfully created ZIP with {files_added} file(s) and metadata.json from {storage_backend} storage.",
+            f"Successfully created comprehensive backup with {files_added} media file(s), "
+            f"{users.count()} user(s), {tags.count()} tag(s), "
+            f"and {comments.count()} comment(s) from {storage_backend} storage.",
             level=messages.SUCCESS
         )
         
