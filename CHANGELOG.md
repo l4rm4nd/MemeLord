@@ -1,3 +1,10 @@
+## [1.4.0](https://github.com/l4rm4nd/MemeLord/compare/v1.3.1...v1.4.0) (2026-01-19)
+
+
+### Features
+
+* thumbnail support ([8a0e286](https://github.com/l4rm4nd/MemeLord/commit/8a0e2863681cd3448863b9834a94cbc1f9556cbf))
+
 ## [1.3.1](https://github.com/l4rm4nd/MemeLord/compare/v1.3.0...v1.3.1) (2025-12-10)
 
 
@@ -25,12 +32,4 @@
 ### Bug Fixes
 
 * adjust backup logic to support new storage providers ([99546b6](https://github.com/l4rm4nd/MemeLord/commit/99546b66769a9ac7a21b6cd9d73b1e0ebc6515fe))
-
-## [1.2.0](https://github.com/l4rm4nd/MemeLord/compare/v1.1.0...v1.2.0) (2025-12-09)
-
-
-### Features
-
-* optional redis session cache ([00cd568](https://github.com/l4rm4nd/MemeLord/commit/00cd568fbcdc84322bbe17fe8ef572720ad0e7cc))
-* support for s3 and more storage providers ([a436e61](https://github.com/l4rm4nd/MemeLord/commit/a436e61f7698fb5010821bf5e3cb58406fea14a5))
 
