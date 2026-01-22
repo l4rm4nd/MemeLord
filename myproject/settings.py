@@ -31,6 +31,9 @@ DEBUG = os.environ.get('DEBUG', 'False').lower() in ['true']
 # get container version from env
 VERSION = escape(os.environ.get("VERSION", ''))
 
+# Enable/disable public meme feed feature (must be after import os)
+ENABLE_PUBLIC_FEED = os.environ.get('ENABLE_PUBLIC_FEED', 'False').lower() in ['true', '1', 'yes']
+
 # auto-generate a secure secret key or use from env variable
 SECRET_KEY = os.environ.get("SECRET_KEY", secrets.token_urlsafe(32))
 

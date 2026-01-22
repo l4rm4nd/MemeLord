@@ -59,7 +59,7 @@ class MediaAdmin(admin.ModelAdmin):
         "title",
         "media_type",
         "uploader",
-        "is_public",
+        "public_feed_enabled",
         "album",
         "tag_list",
         "created_at",
@@ -73,7 +73,7 @@ class MediaAdmin(admin.ModelAdmin):
     )
     list_filter = (
         "media_type",
-        "is_public",
+        "public_feed_enabled",
         "album",
         "tags",
         "created_at",
@@ -87,7 +87,7 @@ class MediaAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            "fields": ("title", "file", "media_type", "uploader", "album", "is_public")
+            "fields": ("title", "file", "media_type", "uploader", "album", "public_feed_enabled")
         }),
         ("Tags", {
             "fields": ("tags",),
@@ -172,23 +172,41 @@ class MediaAdmin(admin.ModelAdmin):
     @admin.action(description="Download selected media as ZIP (with all fixtures)")
     def download_media_as_zip(self, request, queryset):
         """
-        Create a comprehensive ZIP file containing:
-        1. All selected media files (images/videos)
-        2. Complete Django fixtures in JSON format:
-           - Users (uploaders, comment authors)
-           - Groups (if users belong to groups)
-           - Tags (associated with media)
-           - Media records (metadata)
-           - Comments (on media)
-        3. README with import instructions
+        Create a comprehensive backup ZIP containing media files and complete database fixtures.
         
-        Preserves the original folder structure so files can be extracted directly to MEDIA_ROOT.
-        Works with all storage backends (local, S3, Azure, GCS, SFTP, Dropbox, FTP).
+        ## How to use:
+        1. Navigate to the Media section in Django admin at `/admin/myapp/media/`
+        2. Select the media items you want to backup (use "Select all" for complete backup)
+        3. Choose "Download selected media as ZIP (with all fixtures)" from the Actions dropdown
+        4. Click "Go"
+        
+        ## The downloaded ZIP contains:
+        - **media/** - All media files in their original folder structure (memes/user_X/...)
+        - **fixtures/** - Complete database fixtures for restore:
+          - groups.json - User groups
+          - users.json - User accounts (excluding passwords)
+          - tags.json - All tags associated with the media
+          - media.json - Media metadata and relationships
+          - comments.json - All comments on the media
+        - **README.md** - Detailed restore instructions with correct import order
+        - **summary.json** - Backup statistics and metadata
+        
+        ## Restore process:
+        1. Extract media files to MEDIA_ROOT
+        2. Load fixtures in order: groups → users → tags → media → comments
+        3. Run `python manage.py generate_thumbnails` (optional)
+        
+        ## Technical details:
+        - Preserves original folder structure for easy restoration
+        - Works with all storage backends (local, S3, Azure, GCS, SFTP, Dropbox, FTP)
+        - User passwords excluded for security (must be reset after import)
+        - Captures all related data: users, groups, tags, and comments
+        - Maintains referential integrity through proper fixture loading order
         
         To restore:
         1. Extract media files to MEDIA_ROOT
-        2. Run: python manage.py loaddata fixtures/users.json
-        3. Run: python manage.py loaddata fixtures/groups.json
+        2. Run: python manage.py loaddata fixtures/groups.json
+        3. Run: python manage.py loaddata fixtures/users.json
         4. Run: python manage.py loaddata fixtures/tags.json
         5. Run: python manage.py loaddata fixtures/media.json
         6. Run: python manage.py loaddata fixtures/comments.json

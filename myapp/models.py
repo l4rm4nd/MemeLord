@@ -93,7 +93,7 @@ class Media(TimeStampedModel):
     )
 
     # future proofing for private albums, etc.
-    is_public = models.BooleanField(default=True)
+    public_feed_enabled = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["-created_at"]

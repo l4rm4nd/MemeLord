@@ -17,6 +17,15 @@ app_name = "myapp"
 
 urlpatterns = [
     path("memes/", views.meme_list, name="meme_list"),
+]
+
+# Conditionally add public feed route
+if getattr(settings, 'ENABLE_PUBLIC_FEED', False):
+    urlpatterns += [
+        path("public/", views.public_memes, name="public_memes"),
+    ]
+
+urlpatterns += [
     path("memes/upload/", views.meme_upload, name="meme_upload"),
     path("memes/random/", views.meme_random, name="meme_random"),
     path("memes/statistics/", views.meme_statistics, name="meme_statistics"),

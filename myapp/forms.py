@@ -72,9 +72,19 @@ class MediaUploadForm(forms.ModelForm):
         }),
     )
 
+
+    if getattr(settings, 'ENABLE_PUBLIC_FEED', False):
+        public_feed_enabled = forms.BooleanField(
+            required=False,
+            initial=False,
+            label="Public",
+            help_text="If checked, this meme will be visible to anonymous users on the public feed.",
+            widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
+        )
+
     class Meta:
         model = Media
-        fields = ["title", "file", "album", "tags_input"]
+        fields = ["title", "file", "album", "tags_input", "public_feed_enabled"]
         widgets = {
             "title": forms.TextInput(attrs={"class": "form-control"}),
             "album": forms.Select(attrs={"class": "form-select"}),
@@ -132,6 +142,7 @@ class MediaUploadForm(forms.ModelForm):
         media = super().save(commit=False)
         media.uploader = user
         media.media_type = self.cleaned_data["media_type"]
+        media.public_feed_enabled = self.cleaned_data.get("public_feed_enabled", True)
 
         if commit:
             media.save()

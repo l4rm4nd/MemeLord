@@ -1,3 +1,4 @@
+from django.views.decorators.csrf import csrf_exempt
 import os, base64, io, json
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -34,10 +35,44 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+@require_GET
+@csrf_exempt
+def public_memes(request):
+    if not getattr(settings, 'ENABLE_PUBLIC_FEED', False):
+        from django.http import Http404
+        raise Http404()
+
+    qs = (
+        Media.objects.filter(public_feed_enabled=True)
+        .select_related("uploader", "album")
+        .prefetch_related("tags")
+        .annotate(comment_count=Count("comments"))
+        .order_by("-created_at")
+    )
+
+    tag_slug = request.GET.get("tag") or ""
+    current_tag = None
+    if tag_slug:
+        qs = qs.filter(tags__slug=tag_slug)
+        qs = qs.distinct()
+        from .models import Tag
+        current_tag = Tag.objects.filter(slug=tag_slug).first()
+
+    paginator = Paginator(qs, 24)
+    page_number = request.GET.get("page") or 1
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        "page_obj": page_obj,
+        "current_tag": current_tag,
+        "public_feed": True,
+    }
+    return render(request, "myapp/meme_list.html", context)
+
 @login_required
 def meme_list(request):
     qs = (
-        Media.objects.filter(is_public=True)
+        Media.objects.filter()
         .select_related("uploader", "album")
         .prefetch_related("tags")
         .annotate(comment_count=Count("comments"))
@@ -83,21 +118,28 @@ def meme_list(request):
 
 @login_required
 def meme_upload(request):
+    from django.conf import settings
+    enable_public = getattr(settings, 'ENABLE_PUBLIC_FEED', False)
     if request.method == "POST":
         form = MediaUploadForm(request.POST, request.FILES)
-        # limit album choices to user's albums
         form.fields["album"].queryset = Album.objects.filter(owner=request.user)
+        if not enable_public and "is_public" in form.fields:
+            form.fields.pop("is_public")
         if form.is_valid():
             media = form.save(user=request.user, commit=True)
-            media.is_public = True  # for now, album privacy is separate
-            media.save(update_fields=["is_public"])
+            if not enable_public:
+                media.public_feed_enabled = True  # fallback: always public if feature is off
+                media.save(update_fields=["public_feed_enabled"])
             return redirect("myapp:meme_detail", pk=media.pk)
     else:
         form = MediaUploadForm()
         form.fields["album"].queryset = Album.objects.filter(owner=request.user)
+        if not enable_public and "is_public" in form.fields:
+            form.fields.pop("is_public")
 
     context = {
         "form": form,
+        "enable_public": enable_public,
     }
     return render(request, "myapp/meme_upload.html", context)
 
@@ -123,7 +165,7 @@ def meme_detail(request, pk):
         pk=pk,
     )
 
-    if not media.is_public:
+    if not media.public_feed_enabled:
         if not request.user.is_superuser and (
             not media.album or media.album.owner != request.user
         ):

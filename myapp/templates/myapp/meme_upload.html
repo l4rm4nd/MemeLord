@@ -15,6 +15,92 @@
         <form method="post" enctype="multipart/form-data" id="meme-upload-form">
           {% csrf_token %}
 
+          {% if enable_public and form.public_feed_enabled %}
+<div class="mb-4">
+  <label for="id_public_feed_enabled" class="form-label d-flex align-items-center">
+    {{ form.public_feed_enabled.label }}
+    <span 
+      tabindex="0" 
+      class="ms-2 text-warning" 
+      id="public-info-icon" 
+      style="cursor: pointer; line-height: 1;" 
+      data-bs-toggle="popover" 
+      data-bs-placement="right"
+      data-bs-trigger="hover focus" 
+      data-bs-content="{{ form.public_feed_enabled.help_text|escapejs }}"
+      aria-label="Important information about public uploads">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-exclamation-triangle-fill" viewBox="0 0 16 16">
+        <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+      </svg>
+    </span>
+  </label>
+  
+  <div class="form-check form-switch">
+    <input 
+      type="checkbox" 
+      id="id_public_feed_enabled" 
+      name="public_feed_enabled" 
+      class="form-check-input" 
+      role="switch"
+      aria-describedby="public-feed-help"
+      {% if form.public_feed_enabled.value %}checked{% endif %}>
+    <label class="form-check-label text-muted small" for="id_public_feed_enabled" id="public-feed-help">
+      Enable to share with the public feed
+    </label>
+  </div>
+  
+  {% if form.public_feed_enabled.errors %}
+    <div class="invalid-feedback d-block mt-2">
+      {{ form.public_feed_enabled.errors|striptags }}
+    </div>
+  {% endif %}
+</div>
+
+<!-- Modal for public confirmation -->
+<div class="modal fade" id="publicConfirmModal" tabindex="-1" aria-labelledby="publicConfirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title d-flex align-items-center" id="publicConfirmModalLabel">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-exclamation-triangle-fill text-warning me-2" viewBox="0 0 16 16">
+            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+          </svg>
+          Confirm Public Upload
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body pt-3">
+        <p class="mb-3">Are you sure you want to make this meme public? Once published, it will be:</p>
+        <ul class="mb-3">
+          <li>Visible to all users, including anonymous visitors</li>
+          <li>Accessible through the public feed</li>
+          <li>Potentially indexed by search engines</li>
+        </ul>
+        <div class="alert alert-warning d-flex align-items-start mb-0" role="alert">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-shield-exclamation flex-shrink-0 me-2" viewBox="0 0 16 16">
+            <path d="M5.338 1.59a61.44 61.44 0 0 0-2.837.856.481.481 0 0 0-.328.39c-.554 4.157.726 7.19 2.253 9.188a10.725 10.725 0 0 0 2.287 2.233c.346.244.652.42.893.533.12.057.218.095.293.118a.55.55 0 0 0 .101.025.615.615 0 0 0 .1-.025c.076-.023.174-.061.294-.118.24-.113.547-.29.893-.533a10.726 10.726 0 0 0 2.287-2.233c1.527-1.997 2.807-5.031 2.253-9.188a.48.48 0 0 0-.328-.39c-.651-.213-1.75-.56-2.837-.855C9.552 1.29 8.531 1.067 8 1.067c-.53 0-1.552.223-2.662.524zM5.072.56C6.157.265 7.31 0 8 0s1.843.265 2.928.56c1.11.3 2.229.655 2.887.87a1.54 1.54 0 0 1 1.044 1.262c.596 4.477-.787 7.795-2.465 9.99a11.775 11.775 0 0 1-2.517 2.453 7.159 7.159 0 0 1-1.048.625c-.28.132-.581.24-.829.24s-.548-.108-.829-.24a7.158 7.158 0 0 1-1.048-.625 11.777 11.777 0 0 1-2.517-2.453C1.928 10.487.545 7.169 1.141 2.692A1.54 1.54 0 0 1 2.185 1.43 62.456 62.456 0 0 1 5.072.56z"/>
+            <path d="M7.001 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.553.553 0 0 1-1.1 0L7.1 4.995z"/>
+          </svg>
+          <div>
+            <strong>This action cannot be undone.</strong> Once published, the only way to remove it from public view is to delete the meme entirely.
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirmPublicBtn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle me-1" viewBox="0 0 16 16">
+            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+            <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
+          </svg>
+          Yes, Make Public
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
           <div class="mb-3">
             <label for="id_title" class="form-label">Title</label>
             {{ form.title }}
@@ -87,7 +173,40 @@
 </div>
 
 <script>
+  // Bootstrap popover for info icon
+  document.addEventListener("DOMContentLoaded", function() {
+    var infoIcon = document.getElementById('public-info-icon');
+    if (infoIcon && window.bootstrap) {
+      new bootstrap.Popover(infoIcon, {container: 'body', html: false, trigger: 'hover focus click'});
+    }
+  });
   (function() {
+    // Modal and slider logic for public meme approval
+    const isPublicSwitch = document.getElementById("id_public_feed_enabled");
+    const form = document.getElementById("meme-upload-form");
+    let publicConfirmed = false;
+
+    if (isPublicSwitch && form) {
+      // Intercept form submit if public is checked and not confirmed
+      form.addEventListener("submit", function(e) {
+        if (isPublicSwitch.checked && !publicConfirmed) {
+          e.preventDefault();
+          const modal = new bootstrap.Modal(document.getElementById('publicConfirmModal'));
+          modal.show();
+        }
+      });
+      // Modal confirm button
+      const confirmBtn = document.getElementById("confirmPublicBtn");
+      if (confirmBtn) {
+        confirmBtn.addEventListener("click", function() {
+          publicConfirmed = true;
+          const modalEl = document.getElementById('publicConfirmModal');
+          const modal = bootstrap.Modal.getInstance(modalEl);
+          modal.hide();
+          form.requestSubmit();
+        });
+      }
+    }
     const fileInput = document.getElementById("id_file");
     const dropzone = document.getElementById("upload-dropzone");
     const selectBtn = document.getElementById("select-file-btn");

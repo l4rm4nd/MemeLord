@@ -1,15 +1,17 @@
 {% extends "myapp/base.html" %}
 {% load static %}
 
-{% block title %}Meme Board{% endblock %}
+{% block title %}MemeLord{% endblock %}
 
 {% block content %}
 <div class="meme-toolbar-sticky d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
     <h1 class="h3 h4-sm mb-0 flex-grow-0">
-      {% if random_mode %}
+      {% if public_feed %}
+        Public Feed
+      {% elif random_mode %}
         Randomized Feed
       {% else %}
-        Public Feed
+        Authenticated Feed
       {% endif %}
     </h1>
 
