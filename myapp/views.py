@@ -36,7 +36,6 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 @require_GET
-@csrf_exempt
 def public_memes(request):
     if not getattr(settings, 'ENABLE_PUBLIC_FEED', False):
         from django.http import Http404
@@ -68,6 +67,26 @@ def public_memes(request):
         "public_feed": True,
     }
     return render(request, "myapp/meme_list.html", context)
+
+@require_GET
+def public_tag_suggestions(request):
+    q = (request.GET.get("q") or "").strip()
+
+    # Only tags from public memes
+    public_media = Media.objects.filter(public_feed_enabled=True)
+    tag_ids = public_media.values_list("tags", flat=True)
+    tag_qs = Tag.objects.filter(id__in=tag_ids)
+    if q:
+        tag_qs = tag_qs.filter(name__icontains=q)
+    tags = (
+        tag_qs.annotate(num_media=Count("media_items"))
+        .order_by("-num_media", "name")[:10]
+    )
+    results = [
+        {"id": t.id, "name": t.name, "slug": t.slug, "count": t.num_media or 0}
+        for t in tags
+    ]
+    return JsonResponse({"results": results})
 
 @login_required
 def meme_list(request):

@@ -39,7 +39,7 @@
     <span class="badge bg-primary">
       Filter: #{{ current_tag.name }}
     </span>
-    <a href="{% url 'myapp:meme_list' %}" class="btn btn-sm btn-outline-secondary ms-2">
+    <a href="{% if public_feed %}{% url 'myapp:public_memes' %}{% else %}{% url 'myapp:meme_list' %}{% endif %}" class="btn btn-sm btn-outline-secondary ms-2">
       Clear
     </a>
   </div>
@@ -289,7 +289,7 @@
 
     let timeout = null;
     function fetchSuggestions(q) {
-      fetch("{% url 'myapp:tag_suggestions' %}?q=" + encodeURIComponent(q))
+      fetch("{% if public_feed %}{% url 'myapp:public_tag_suggestions' %}{% else %}{% url 'myapp:tag_suggestions' %}{% endif %}?q=" + encodeURIComponent(q))
         .then(r => r.json())
         .then(data => {
           box.innerHTML = "";

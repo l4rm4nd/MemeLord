@@ -23,6 +23,7 @@ urlpatterns = [
 if getattr(settings, 'ENABLE_PUBLIC_FEED', False):
     urlpatterns += [
         path("public/", views.public_memes, name="public_memes"),
+        path("public/tags/suggest/", views.public_tag_suggestions, name="public_tag_suggestions"),
     ]
 
 urlpatterns += [
