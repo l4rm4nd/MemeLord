@@ -1,3 +1,10 @@
+## [1.5.2](https://github.com/l4rm4nd/MemeLord/compare/v1.5.1...v1.5.2) (2026-01-23)
+
+
+### Bug Fixes
+
+* make memes private if public feed disabled ([e98c584](https://github.com/l4rm4nd/MemeLord/commit/e98c584af5d7e0ebfb455297b98e820ce98aaf10))
+
 ## [1.5.1](https://github.com/l4rm4nd/MemeLord/compare/v1.5.0...v1.5.1) (2026-01-22)
 
 
@@ -25,11 +32,4 @@
 ### Features
 
 * thumbnail support ([8a0e286](https://github.com/l4rm4nd/MemeLord/commit/8a0e2863681cd3448863b9834a94cbc1f9556cbf))
-
-## [1.3.1](https://github.com/l4rm4nd/MemeLord/compare/v1.3.0...v1.3.1) (2025-12-10)
-
-
-### Bug Fixes
-
-* remove ftp storage and update documentation ([682b478](https://github.com/l4rm4nd/MemeLord/commit/682b478f9122bc9e4cc86c7e7b2807b47c7ffd4c))
 
