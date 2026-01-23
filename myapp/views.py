@@ -147,7 +147,7 @@ def meme_upload(request):
         if form.is_valid():
             media = form.save(user=request.user, commit=True)
             if not enable_public:
-                media.public_feed_enabled = True  # fallback: always public if feature is off
+                media.public_feed_enabled = False  # fallback: always private if feature is off
                 media.save(update_fields=["public_feed_enabled"])
             return redirect("myapp:meme_detail", pk=media.pk)
     else:
