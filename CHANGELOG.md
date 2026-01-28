@@ -1,3 +1,10 @@
+## [1.5.3](https://github.com/l4rm4nd/MemeLord/compare/v1.5.2...v1.5.3) (2026-01-28)
+
+
+### Bug Fixes
+
+* bump mozilla-oidc ([0ea8d68](https://github.com/l4rm4nd/MemeLord/commit/0ea8d68ff245a1546723bbe4b8217637f85527e2))
+
 ## [1.5.2](https://github.com/l4rm4nd/MemeLord/compare/v1.5.1...v1.5.2) (2026-01-23)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * improvide preloading, caching and media export/backup ([ad76c28](https://github.com/l4rm4nd/MemeLord/commit/ad76c2859fd7a6a703c1acf30c1d97c0f582e9f3))
-
-## [1.4.0](https://github.com/l4rm4nd/MemeLord/compare/v1.3.1...v1.4.0) (2026-01-19)
-
-
-### Features
-
-* thumbnail support ([8a0e286](https://github.com/l4rm4nd/MemeLord/commit/8a0e2863681cd3448863b9834a94cbc1f9556cbf))
 
