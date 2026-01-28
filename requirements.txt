@@ -18,8 +18,7 @@ django-celery-beat==2.8.1
 django-redis==6.0.0
 
 # OIDC
-mozilla-django-oidc==4.0.1
-josepy==1.5.0
+mozilla-django-oidc==5.0.2
 
 # STORAGE
 django-storages==1.14.6
