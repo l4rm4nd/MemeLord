@@ -1,3 +1,10 @@
+## [1.5.4](https://github.com/l4rm4nd/MemeLord/compare/v1.5.3...v1.5.4) (2026-01-31)
+
+
+### Bug Fixes
+
+* improve OIDC autologin ([8c54c67](https://github.com/l4rm4nd/MemeLord/commit/8c54c6787aa484d74bfd3e8d987c894d23519f66))
+
 ## [1.5.3](https://github.com/l4rm4nd/MemeLord/compare/v1.5.2...v1.5.3) (2026-01-28)
 
 
@@ -25,11 +32,4 @@
 ### Features
 
 * support public feed on /public; fixes [#5](https://github.com/l4rm4nd/MemeLord/issues/5) ([6b25f98](https://github.com/l4rm4nd/MemeLord/commit/6b25f98bd4ffb3a11f5082e1af6a503a777de97d))
-
-## [1.4.1](https://github.com/l4rm4nd/MemeLord/compare/v1.4.0...v1.4.1) (2026-01-19)
-
-
-### Bug Fixes
-
-* improvide preloading, caching and media export/backup ([ad76c28](https://github.com/l4rm4nd/MemeLord/commit/ad76c2859fd7a6a703c1acf30c1d97c0f582e9f3))
 
