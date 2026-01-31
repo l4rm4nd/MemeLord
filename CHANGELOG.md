@@ -1,3 +1,10 @@
+## [1.5.5](https://github.com/l4rm4nd/MemeLord/compare/v1.5.4...v1.5.5) (2026-01-31)
+
+
+### Bug Fixes
+
+* default django login endpoints ([81c44d7](https://github.com/l4rm4nd/MemeLord/commit/81c44d77b51c74e8666aa31f54cc10ff1df3e2b3))
+
 ## [1.5.4](https://github.com/l4rm4nd/MemeLord/compare/v1.5.3...v1.5.4) (2026-01-31)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * public feed tag filters ([2d5c8eb](https://github.com/l4rm4nd/MemeLord/commit/2d5c8eb327c8290a7390e5d11bc6aa4d1705be2c))
-
-## [1.5.0](https://github.com/l4rm4nd/MemeLord/compare/v1.4.1...v1.5.0) (2026-01-22)
-
-
-### Features
-
-* support public feed on /public; fixes [#5](https://github.com/l4rm4nd/MemeLord/issues/5) ([6b25f98](https://github.com/l4rm4nd/MemeLord/commit/6b25f98bd4ffb3a11f5082e1af6a503a777de97d))
 
