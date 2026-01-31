@@ -32,8 +32,35 @@ from django.core.paginator import Paginator
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_GET
 from django.contrib.auth import get_user_model
+from django.contrib.auth import views as auth_views
+from django.urls import reverse
+from urllib.parse import quote
+from django.utils.http import url_has_allowed_host_and_scheme
 
 User = get_user_model()
+
+def smart_login(request):
+    next_url = request.GET.get('next', '')
+    
+    # Validate the next URL
+    if next_url and not url_has_allowed_host_and_scheme(
+        url=next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure()
+    ):
+        next_url = settings.LOGIN_REDIRECT_URL  # Fallback to safe default
+    
+    # Set default if still empty
+    if not next_url:
+        next_url = settings.LOGIN_REDIRECT_URL or '/'
+    
+    # If OIDC autologin is enabled, redirect immediately
+    if getattr(settings, 'OIDC_AUTOLOGIN', False):
+        oidc_url = reverse('oidc_authentication_init')
+        return redirect(f"{oidc_url}?next={next_url}")
+    
+    # Otherwise, render the login page normally
+    return render(request, 'registration/login.html', {'next': next_url})
 
 @require_GET
 def public_memes(request):
