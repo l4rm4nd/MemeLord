@@ -40,27 +40,23 @@ from django.utils.http import url_has_allowed_host_and_scheme
 User = get_user_model()
 
 def smart_login(request):
-    next_url = request.GET.get('next', '')
-    
-    # Validate the next URL
-    if next_url and not url_has_allowed_host_and_scheme(
+    next_url = request.GET.get("next") or settings.LOGIN_REDIRECT_URL or "/"
+
+    if not url_has_allowed_host_and_scheme(
         url=next_url,
         allowed_hosts={request.get_host()},
-        require_https=request.is_secure()
+        require_https=request.is_secure(),
     ):
-        next_url = settings.LOGIN_REDIRECT_URL  # Fallback to safe default
-    
-    # Set default if still empty
-    if not next_url:
-        next_url = settings.LOGIN_REDIRECT_URL or '/'
-    
-    # If OIDC autologin is enabled, redirect immediately
-    if getattr(settings, 'OIDC_AUTOLOGIN', False):
-        oidc_url = reverse('oidc_authentication_init')
-        return redirect(f"{oidc_url}?next={next_url}")
-    
-    # Otherwise, render the login page normally
-    return render(request, 'registration/login.html', {'next': next_url})
+        next_url = settings.LOGIN_REDIRECT_URL or "/"
+
+    # OIDC autologin
+    if settings.OIDC_ENABLED and getattr(settings, "OIDC_AUTOLOGIN", False):
+        return redirect(f"{reverse('oidc_authentication_init')}?next={next_url}")
+
+    # FALL BACK TO DJANGO'S REAL LOGIN VIEW
+    return LoginView.as_view(
+        template_name="registration/login.html"
+    )(request)
 
 @require_GET
 def public_memes(request):
