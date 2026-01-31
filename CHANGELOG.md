@@ -1,3 +1,10 @@
+## [1.5.7](https://github.com/l4rm4nd/MemeLord/compare/v1.5.6...v1.5.7) (2026-01-31)
+
+
+### Bug Fixes
+
+* custom login view ([f3b6cc6](https://github.com/l4rm4nd/MemeLord/commit/f3b6cc6a93f6b2b1b84ecb536b9c35a75303f8ea))
+
 ## [1.5.6](https://github.com/l4rm4nd/MemeLord/compare/v1.5.5...v1.5.6) (2026-01-31)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * bump mozilla-oidc ([0ea8d68](https://github.com/l4rm4nd/MemeLord/commit/0ea8d68ff245a1546723bbe4b8217637f85527e2))
-
-## [1.5.2](https://github.com/l4rm4nd/MemeLord/compare/v1.5.1...v1.5.2) (2026-01-23)
-
-
-### Bug Fixes
-
-* make memes private if public feed disabled ([e98c584](https://github.com/l4rm4nd/MemeLord/commit/e98c584af5d7e0ebfb455297b98e820ce98aaf10))
 
