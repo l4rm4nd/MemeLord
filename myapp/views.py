@@ -36,6 +36,7 @@ from django.contrib.auth import views as auth_views
 from django.urls import reverse
 from urllib.parse import quote
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.contrib.auth.views import LoginView
 
 User = get_user_model()
 
