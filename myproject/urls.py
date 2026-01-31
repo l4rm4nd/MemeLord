@@ -31,12 +31,8 @@ urlpatterns_i18n = i18n_patterns(
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("myapp.urls")),
-
-    # Override Django's default login route
-    path("accounts/login/", myapp_views.smart_login, name="login"),
-
-    # Keep the rest of the auth URLs (logout, password_change, etc.)
     path("accounts/", include("django.contrib.auth.urls")),
+    path("accounts/login/", myapp_views.smart_login, name="login"),
 ]
 
 # Conditionally include OIDC URLs if OIDC_ENABLED is False
