@@ -1,3 +1,10 @@
+## [1.5.6](https://github.com/l4rm4nd/MemeLord/compare/v1.5.5...v1.5.6) (2026-01-31)
+
+
+### Bug Fixes
+
+* local auth ([d23c906](https://github.com/l4rm4nd/MemeLord/commit/d23c9060265bb466954b7e9c50a97d414a501011))
+
 ## [1.5.5](https://github.com/l4rm4nd/MemeLord/compare/v1.5.4...v1.5.5) (2026-01-31)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * make memes private if public feed disabled ([e98c584](https://github.com/l4rm4nd/MemeLord/commit/e98c584af5d7e0ebfb455297b98e820ce98aaf10))
-
-## [1.5.1](https://github.com/l4rm4nd/MemeLord/compare/v1.5.0...v1.5.1) (2026-01-22)
-
-
-### Bug Fixes
-
-* public feed tag filters ([2d5c8eb](https://github.com/l4rm4nd/MemeLord/commit/2d5c8eb327c8290a7390e5d11bc6aa4d1705be2c))
 
