@@ -1,3 +1,10 @@
+## [1.5.8](https://github.com/l4rm4nd/MemeLord/compare/v1.5.7...v1.5.8) (2026-02-03)
+
+
+### Bug Fixes
+
+* bump Django ([ebf2533](https://github.com/l4rm4nd/MemeLord/commit/ebf2533bb497a8a9e1f0d9cb032c53f35bc23a08))
+
 ## [1.5.7](https://github.com/l4rm4nd/MemeLord/compare/v1.5.6...v1.5.7) (2026-01-31)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * improve OIDC autologin ([8c54c67](https://github.com/l4rm4nd/MemeLord/commit/8c54c6787aa484d74bfd3e8d987c894d23519f66))
-
-## [1.5.3](https://github.com/l4rm4nd/MemeLord/compare/v1.5.2...v1.5.3) (2026-01-28)
-
-
-### Bug Fixes
-
-* bump mozilla-oidc ([0ea8d68](https://github.com/l4rm4nd/MemeLord/commit/0ea8d68ff245a1546723bbe4b8217637f85527e2))
 
