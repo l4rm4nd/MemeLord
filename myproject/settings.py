@@ -506,9 +506,14 @@ if STORAGE_BACKEND == 's3':
     # Use signature version 4 (required for all regions)
     AWS_S3_SIGNATURE_VERSION = 's3v4'
     
-    # Use virtual-hosted-style URLs (bucket-name.s3.region.amazonaws.com)
-    # This is the default and recommended format
-    AWS_S3_ADDRESSING_STYLE = 'virtual'
+    # Use virtual-hosted-style URLs as default (bucket-name.s3.region.amazonaws.com)
+    ALLOWED_S3_ADDRESSING_STYLES = {"virtual", "path"}
+    AWS_S3_ADDRESSING_STYLE = os.environ.get("AWS_S3_ADDRESSING_STYLE", "virtual").strip().lower()
+    if AWS_S3_ADDRESSING_STYLE not in ALLOWED_S3_ADDRESSING_STYLES:
+        raise ValueError(
+            f"Invalid AWS_S3_ADDRESSING_STYLE={AWS_S3_ADDRESSING_STYLE!r}. "
+            f"Allowed values: {sorted(ALLOWED_S3_ADDRESSING_STYLES)}"
+        )
     
     # Django 5.0+ STORAGES configuration
     STORAGES = {
