@@ -1,3 +1,10 @@
+## [1.5.9](https://github.com/l4rm4nd/MemeLord/compare/v1.5.8...v1.5.9) (2026-02-10)
+
+
+### Bug Fixes
+
+* make AWS_S3_ADDRESSING_STYLE configurable ([72aaacf](https://github.com/l4rm4nd/MemeLord/commit/72aaacf496505d84d2cfc005be9fd8f22e3bd92e)), closes [#8](https://github.com/l4rm4nd/MemeLord/issues/8)
+
 ## [1.5.8](https://github.com/l4rm4nd/MemeLord/compare/v1.5.7...v1.5.8) (2026-02-03)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * default django login endpoints ([81c44d7](https://github.com/l4rm4nd/MemeLord/commit/81c44d77b51c74e8666aa31f54cc10ff1df3e2b3))
-
-## [1.5.4](https://github.com/l4rm4nd/MemeLord/compare/v1.5.3...v1.5.4) (2026-01-31)
-
-
-### Bug Fixes
-
-* improve OIDC autologin ([8c54c67](https://github.com/l4rm4nd/MemeLord/commit/8c54c6787aa484d74bfd3e8d987c894d23519f66))
 
