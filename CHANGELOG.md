@@ -1,3 +1,10 @@
+## [1.5.10](https://github.com/l4rm4nd/MemeLord/compare/v1.5.9...v1.5.10) (2026-02-12)
+
+
+### Bug Fixes
+
+* Update requirements.txt ([9904160](https://github.com/l4rm4nd/MemeLord/commit/99041605e05e7ec2f64cad99ad59a5ffa25b0f74))
+
 ## [1.5.9](https://github.com/l4rm4nd/MemeLord/compare/v1.5.8...v1.5.9) (2026-02-10)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * local auth ([d23c906](https://github.com/l4rm4nd/MemeLord/commit/d23c9060265bb466954b7e9c50a97d414a501011))
-
-## [1.5.5](https://github.com/l4rm4nd/MemeLord/compare/v1.5.4...v1.5.5) (2026-01-31)
-
-
-### Bug Fixes
-
-* default django login endpoints ([81c44d7](https://github.com/l4rm4nd/MemeLord/commit/81c44d77b51c74e8666aa31f54cc10ff1df3e2b3))
 
