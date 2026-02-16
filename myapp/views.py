@@ -208,12 +208,6 @@ def meme_detail(request, pk):
         pk=pk,
     )
 
-    if not media.public_feed_enabled:
-        if not request.user.is_superuser and (
-            not media.album or media.album.owner != request.user
-        ):
-            raise Http404("Media not found")
-
     # only used if some non-AJAX POST still hits meme_detail
     if request.method == "POST":
         comment_form = CommentForm(request.POST)
@@ -240,7 +234,7 @@ def meme_detail(request, pk):
         "media": media,
         "comment_form": comment_form,
         "comments_page": comments_page,   # <── this is what the template uses
-        "title_form": title_form,
+        "_form": title_form,
         "tag_form": tag_form,
     }
     return render(request, "myapp/meme_detail.html", context)
