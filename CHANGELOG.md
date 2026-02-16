@@ -1,3 +1,10 @@
+## [1.5.11](https://github.com/l4rm4nd/MemeLord/compare/v1.5.10...v1.5.11) (2026-02-16)
+
+
+### Bug Fixes
+
+* remove unused code that prevents detailed view ([7374cf9](https://github.com/l4rm4nd/MemeLord/commit/7374cf96b621b1dd78cc09d25ddf60c727116738))
+
 ## [1.5.10](https://github.com/l4rm4nd/MemeLord/compare/v1.5.9...v1.5.10) (2026-02-12)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * custom login view ([f3b6cc6](https://github.com/l4rm4nd/MemeLord/commit/f3b6cc6a93f6b2b1b84ecb536b9c35a75303f8ea))
-
-## [1.5.6](https://github.com/l4rm4nd/MemeLord/compare/v1.5.5...v1.5.6) (2026-01-31)
-
-
-### Bug Fixes
-
-* local auth ([d23c906](https://github.com/l4rm4nd/MemeLord/commit/d23c9060265bb466954b7e9c50a97d414a501011))
 
