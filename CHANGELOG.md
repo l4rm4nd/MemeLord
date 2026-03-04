@@ -1,3 +1,10 @@
+## [1.5.12](https://github.com/l4rm4nd/MemeLord/compare/v1.5.11...v1.5.12) (2026-03-04)
+
+
+### Bug Fixes
+
+* bump Django ([c81b721](https://github.com/l4rm4nd/MemeLord/commit/c81b7215b81eb0e730d6ead0872ab5ae6013f337))
+
 ## [1.5.11](https://github.com/l4rm4nd/MemeLord/compare/v1.5.10...v1.5.11) (2026-02-16)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * bump Django ([ebf2533](https://github.com/l4rm4nd/MemeLord/commit/ebf2533bb497a8a9e1f0d9cb032c53f35bc23a08))
-
-## [1.5.7](https://github.com/l4rm4nd/MemeLord/compare/v1.5.6...v1.5.7) (2026-01-31)
-
-
-### Bug Fixes
-
-* custom login view ([f3b6cc6](https://github.com/l4rm4nd/MemeLord/commit/f3b6cc6a93f6b2b1b84ecb536b9c35a75303f8ea))
 
