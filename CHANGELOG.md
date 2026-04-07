@@ -1,3 +1,10 @@
+## [1.5.13](https://github.com/l4rm4nd/MemeLord/compare/v1.5.12...v1.5.13) (2026-04-07)
+
+
+### Bug Fixes
+
+* bump base image ([5aef2f2](https://github.com/l4rm4nd/MemeLord/commit/5aef2f2849208566b5366e253b0cb5b7e58e2f36))
+
 ## [1.5.12](https://github.com/l4rm4nd/MemeLord/compare/v1.5.11...v1.5.12) (2026-03-04)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * make AWS_S3_ADDRESSING_STYLE configurable ([72aaacf](https://github.com/l4rm4nd/MemeLord/commit/72aaacf496505d84d2cfc005be9fd8f22e3bd92e)), closes [#8](https://github.com/l4rm4nd/MemeLord/issues/8)
-
-## [1.5.8](https://github.com/l4rm4nd/MemeLord/compare/v1.5.7...v1.5.8) (2026-02-03)
-
-
-### Bug Fixes
-
-* bump Django ([ebf2533](https://github.com/l4rm4nd/MemeLord/commit/ebf2533bb497a8a9e1f0d9cb032c53f35bc23a08))
 
