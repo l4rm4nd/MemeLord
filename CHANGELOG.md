@@ -1,3 +1,10 @@
+## [1.5.14](https://github.com/l4rm4nd/MemeLord/compare/v1.5.13...v1.5.14) (2026-04-08)
+
+
+### Bug Fixes
+
+* bump Django fix CVEs ([2393df4](https://github.com/l4rm4nd/MemeLord/commit/2393df494c791d1701f1c82be9f9961553a04a23))
+
 ## [1.5.13](https://github.com/l4rm4nd/MemeLord/compare/v1.5.12...v1.5.13) (2026-04-07)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * Update requirements.txt ([9904160](https://github.com/l4rm4nd/MemeLord/commit/99041605e05e7ec2f64cad99ad59a5ffa25b0f74))
-
-## [1.5.9](https://github.com/l4rm4nd/MemeLord/compare/v1.5.8...v1.5.9) (2026-02-10)
-
-
-### Bug Fixes
-
-* make AWS_S3_ADDRESSING_STYLE configurable ([72aaacf](https://github.com/l4rm4nd/MemeLord/commit/72aaacf496505d84d2cfc005be9fd8f22e3bd92e)), closes [#8](https://github.com/l4rm4nd/MemeLord/issues/8)
 
