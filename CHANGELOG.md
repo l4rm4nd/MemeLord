@@ -1,3 +1,10 @@
+## [1.5.16](https://github.com/l4rm4nd/MemeLord/compare/v1.5.15...v1.5.16) (2026-04-16)
+
+
+### Bug Fixes
+
+* trigger ci after package bump ([f500d4e](https://github.com/l4rm4nd/MemeLord/commit/f500d4e4805abd0cdcf81efb5a7436117b2aa507))
+
 ## [1.5.15](https://github.com/l4rm4nd/MemeLord/compare/v1.5.14...v1.5.15) (2026-04-16)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * bump Django ([c81b721](https://github.com/l4rm4nd/MemeLord/commit/c81b7215b81eb0e730d6ead0872ab5ae6013f337))
-
-## [1.5.11](https://github.com/l4rm4nd/MemeLord/compare/v1.5.10...v1.5.11) (2026-02-16)
-
-
-### Bug Fixes
-
-* remove unused code that prevents detailed view ([7374cf9](https://github.com/l4rm4nd/MemeLord/commit/7374cf96b621b1dd78cc09d25ddf60c727116738))
 
