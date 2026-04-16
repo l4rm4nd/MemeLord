@@ -1,3 +1,10 @@
+## [1.5.15](https://github.com/l4rm4nd/MemeLord/compare/v1.5.14...v1.5.15) (2026-04-16)
+
+
+### Bug Fixes
+
+* bump workflow tags ([2fd36eb](https://github.com/l4rm4nd/MemeLord/commit/2fd36eb6d6685a6e13e1fb41758c37678e955e2c))
+
 ## [1.5.14](https://github.com/l4rm4nd/MemeLord/compare/v1.5.13...v1.5.14) (2026-04-08)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * remove unused code that prevents detailed view ([7374cf9](https://github.com/l4rm4nd/MemeLord/commit/7374cf96b621b1dd78cc09d25ddf60c727116738))
-
-## [1.5.10](https://github.com/l4rm4nd/MemeLord/compare/v1.5.9...v1.5.10) (2026-02-12)
-
-
-### Bug Fixes
-
-* Update requirements.txt ([9904160](https://github.com/l4rm4nd/MemeLord/commit/99041605e05e7ec2f64cad99ad59a5ffa25b0f74))
 
