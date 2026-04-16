@@ -1,5 +1,5 @@
 <div align="center" width="100%">
-    <h1>MemeLord</h1>
+    <h1>MemeLord</h1> 
     <img width="150px" src="myapp/static/assets/img/logo.png">
     <p>A Python Django Meme Image Board</p><p>
     <a target="_blank" href="https://github.com/l4rm4nd"><img src="https://img.shields.io/badge/maintainer-LRVT-orange" /></a>
