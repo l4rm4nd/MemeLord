@@ -1,3 +1,10 @@
+## [1.5.17](https://github.com/l4rm4nd/MemeLord/compare/v1.5.16...v1.5.17) (2026-04-18)
+
+
+### Bug Fixes
+
+* trigger new ci with security jobs ([98d6ce0](https://github.com/l4rm4nd/MemeLord/commit/98d6ce0f866760475b40ab44625dce326aa54696))
+
 ## [1.5.16](https://github.com/l4rm4nd/MemeLord/compare/v1.5.15...v1.5.16) (2026-04-16)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * bump base image ([5aef2f2](https://github.com/l4rm4nd/MemeLord/commit/5aef2f2849208566b5366e253b0cb5b7e58e2f36))
-
-## [1.5.12](https://github.com/l4rm4nd/MemeLord/compare/v1.5.11...v1.5.12) (2026-03-04)
-
-
-### Bug Fixes
-
-* bump Django ([c81b721](https://github.com/l4rm4nd/MemeLord/commit/c81b7215b81eb0e730d6ead0872ab5ae6013f337))
 
