@@ -1,7 +1,7 @@
 # DEFAULT LIBS
 Django==5.2.13
 pytz==2023.3.post1
-python-dotenv==1.0.0
+python-dotenv==1.2.2
 psycopg2-binary==2.9.10
 uwsgi==2.0.29
 
