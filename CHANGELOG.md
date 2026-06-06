@@ -1,3 +1,10 @@
+## [1.5.19](https://github.com/l4rm4nd/MemeLord/compare/v1.5.18...v1.5.19) (2026-06-06)
+
+
+### Bug Fixes
+
+* bump django ([d003ea6](https://github.com/l4rm4nd/MemeLord/commit/d003ea6de3c090c0c81b63184fd683e5a05dd5cc))
+
 ## [1.5.18](https://github.com/l4rm4nd/MemeLord/compare/v1.5.17...v1.5.18) (2026-05-08)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * bump workflow tags ([2fd36eb](https://github.com/l4rm4nd/MemeLord/commit/2fd36eb6d6685a6e13e1fb41758c37678e955e2c))
-
-## [1.5.14](https://github.com/l4rm4nd/MemeLord/compare/v1.5.13...v1.5.14) (2026-04-08)
-
-
-### Bug Fixes
-
-* bump Django fix CVEs ([2393df4](https://github.com/l4rm4nd/MemeLord/commit/2393df494c791d1701f1c82be9f9961553a04a23))
 
