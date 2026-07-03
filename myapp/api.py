@@ -5,7 +5,7 @@ Authentication: Bearer token via `Authorization: Bearer <token>` header.
 """
 import datetime
 import functools
-import random as _random
+import secrets
 
 from django.http import JsonResponse
 from django.utils import timezone
@@ -282,7 +282,7 @@ def memes_random(request):
     if not ids:
         return JsonResponse({"error": "No memes found matching the given filters."}, status=404)
 
-    random_pk = _random.choice(ids)
+    random_pk = secrets.choice(ids)
     media = (
         Media.objects
         .select_related("uploader")
