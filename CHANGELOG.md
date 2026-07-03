@@ -1,3 +1,10 @@
+## [1.6.1](https://github.com/l4rm4nd/MemeLord/compare/v1.6.0...v1.6.1) (2026-07-03)
+
+
+### Bug Fixes
+
+* use OS CSPRNG to solve bandit's B311 ([7ce2178](https://github.com/l4rm4nd/MemeLord/commit/7ce217822dd69b75bbb21f18dbc3ecaf66797026))
+
 ## [1.6.0](https://github.com/l4rm4nd/MemeLord/compare/v1.5.19...v1.6.0) (2026-07-03)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * trigger new ci with security jobs ([98d6ce0](https://github.com/l4rm4nd/MemeLord/commit/98d6ce0f866760475b40ab44625dce326aa54696))
-
-## [1.5.16](https://github.com/l4rm4nd/MemeLord/compare/v1.5.15...v1.5.16) (2026-04-16)
-
-
-### Bug Fixes
-
-* trigger ci after package bump ([f500d4e](https://github.com/l4rm4nd/MemeLord/commit/f500d4e4805abd0cdcf81efb5a7436117b2aa507))
 
