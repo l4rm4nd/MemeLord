@@ -1,3 +1,10 @@
+## [1.6.0](https://github.com/l4rm4nd/MemeLord/compare/v1.5.19...v1.6.0) (2026-07-03)
+
+
+### Features
+
+* add api ([a7c43c7](https://github.com/l4rm4nd/MemeLord/commit/a7c43c7cb10c3d815e0efc2bb6da4047ed6cf354)), closes [#15](https://github.com/l4rm4nd/MemeLord/issues/15)
+
 ## [1.5.19](https://github.com/l4rm4nd/MemeLord/compare/v1.5.18...v1.5.19) (2026-06-06)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * trigger ci after package bump ([f500d4e](https://github.com/l4rm4nd/MemeLord/commit/f500d4e4805abd0cdcf81efb5a7436117b2aa507))
-
-## [1.5.15](https://github.com/l4rm4nd/MemeLord/compare/v1.5.14...v1.5.15) (2026-04-16)
-
-
-### Bug Fixes
-
-* bump workflow tags ([2fd36eb](https://github.com/l4rm4nd/MemeLord/commit/2fd36eb6d6685a6e13e1fb41758c37678e955e2c))
 
