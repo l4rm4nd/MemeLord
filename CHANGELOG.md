@@ -1,3 +1,10 @@
+## [1.6.3](https://github.com/l4rm4nd/MemeLord/compare/v1.6.2...v1.6.3) (2026-07-03)
+
+
+### Bug Fixes
+
+* make new menu mobile responsive ([31edf6a](https://github.com/l4rm4nd/MemeLord/commit/31edf6a9bf371e3ca4c05121dc8ffb018f5fedf7))
+
 ## [1.6.2](https://github.com/l4rm4nd/MemeLord/compare/v1.6.1...v1.6.2) (2026-07-03)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * bump django ([d003ea6](https://github.com/l4rm4nd/MemeLord/commit/d003ea6de3c090c0c81b63184fd683e5a05dd5cc))
-
-## [1.5.18](https://github.com/l4rm4nd/MemeLord/compare/v1.5.17...v1.5.18) (2026-05-08)
-
-
-### Bug Fixes
-
-* bump packages ([6f9bf3d](https://github.com/l4rm4nd/MemeLord/commit/6f9bf3df71d39f591da7adeec52532702d6dcfdb))
 
