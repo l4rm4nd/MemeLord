@@ -9,6 +9,7 @@ from django.utils import timezone
 from django.http import JsonResponse
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
+from django.utils.html import escape
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
@@ -569,3 +570,39 @@ def meme_statistics(request):
     }
     
     return render(request, 'myapp/statistics.html', context)
+
+
+@login_required
+def api_tokens(request):
+    """Manage personal API tokens."""
+    if request.method == "POST":
+        action = request.POST.get("action", "")
+
+        if action == "create":
+            name = request.POST.get("name", "").strip()[:100]
+            if name:
+                token = APIToken.objects.create(user=request.user, name=name)
+                # Store in session so it can be shown exactly once after redirect
+                request.session["new_api_token"] = token.token
+                request.session["new_api_token_name"] = token.name
+
+        elif action == "revoke":
+            token_id = request.POST.get("token_id")
+            APIToken.objects.filter(pk=token_id, user=request.user).update(is_active=False)
+
+        elif action == "delete":
+            token_id = request.POST.get("token_id")
+            APIToken.objects.filter(pk=token_id, user=request.user).delete()
+
+        return redirect("myapp:api_tokens")
+
+    # Pop the one-time token from session – gone after this request
+    new_token = request.session.pop("new_api_token", None)
+    new_token_name = request.session.pop("new_api_token_name", None)
+
+    tokens = APIToken.objects.filter(user=request.user)
+    return render(request, "myapp/api_tokens.html", {
+        "tokens": tokens,
+        "new_token": new_token,
+        "new_token_name": new_token_name,
+    })

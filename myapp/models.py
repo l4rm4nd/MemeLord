@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db import models
 from django.utils.text import slugify
 import logging
+import secrets
 
 logger = logging.getLogger(__name__)
 
@@ -163,3 +164,26 @@ class Comment(TimeStampedModel):
 
     def __str__(self):
         return f"Comment by {self.author} on {self.media}"
+
+
+class APIToken(TimeStampedModel):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="api_tokens",
+    )
+    name = models.CharField(max_length=100, help_text="A label to identify this token.")
+    token = models.CharField(max_length=64, unique=True, editable=False)
+    is_active = models.BooleanField(default=True)
+    last_used_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def save(self, *args, **kwargs):
+        if not self.token:
+            self.token = secrets.token_urlsafe(48)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.name} ({self.user})"

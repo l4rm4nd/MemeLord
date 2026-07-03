@@ -1,5 +1,6 @@
 from django.urls import path, include
 from . import views
+from . import api
 import uuid
 from django.utils import timezone
 from django.contrib.auth.models import User
@@ -38,11 +39,15 @@ urlpatterns += [
     path("memes/tags/suggest/", views.tag_suggestions, name="tag_suggestions"),
     path("memes/<int:pk>/comments/", views.meme_comments, name="meme_comments"),
     path("memes/<int:pk>/comments/add/", views.meme_add_comment, name="meme_add_comment",),
+    path("accounts/api-tokens/", views.api_tokens, name="api_tokens"),
     path('', views.meme_list, name="meme_list"),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('post-logout/', views.post_logout, name='post_logout'),
     path("favicon.ico", RedirectView.as_view(url=staticfiles_storage.url("assets/img/favicon.ico"),permanent=True,),
     ),
+    # REST API
+    path("api/memes/", api.memes_list, name="api_memes_list"),
+    path("api/memes/random/", api.memes_random, name="api_memes_random"),
 ]
 
 admin.site.site_header = "MemeLord"

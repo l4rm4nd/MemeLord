@@ -9,7 +9,7 @@ from django.utils.html import format_html
 from django.core.management import call_command
 from django.utils import timezone
 
-from .models import Tag, Album, Media, Comment
+from .models import Tag, Album, Media, Comment, APIToken
 
 
 class TagAdmin(admin.ModelAdmin):
@@ -515,3 +515,12 @@ admin.site.register(Tag, TagAdmin)
 #admin.site.register(Album, AlbumAdmin)
 admin.site.register(Media, MediaAdmin)
 admin.site.register(Comment, CommentAdmin)
+
+
+@admin.register(APIToken)
+class APITokenAdmin(admin.ModelAdmin):
+    list_display = ("name", "user", "is_active", "created_at", "last_used_at")
+    list_filter = ("is_active",)
+    search_fields = ("name", "user__username")
+    readonly_fields = ("token", "created_at", "updated_at", "last_used_at")
+    ordering = ("-created_at",)

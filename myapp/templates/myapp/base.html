@@ -53,7 +53,56 @@
       html[data-bs-theme="dark"] .navbar-main {
         background-color: #2f343a; /* a bit lighter than full dark for contrast */
       }
-    
+
+      /* Account dropdown trigger – subtle hover that works in both themes */
+      .btn-navbar-account {
+        background: transparent;
+        border: 1px solid rgba(255,255,255,.35);
+        color: #fff;
+        transition: background .15s ease, border-color .15s ease;
+      }
+      .btn-navbar-account:hover,
+      .btn-navbar-account:focus-visible {
+        background: rgba(255,255,255,.12);
+        border-color: rgba(255,255,255,.6);
+        color: #fff;
+      }
+      .btn-navbar-account:focus-visible {
+        outline: 2px solid rgba(255,255,255,.5);
+        outline-offset: 2px;
+      }
+      .btn-navbar-account.show {
+        background: rgba(255,255,255,.18);
+        border-color: rgba(255,255,255,.7);
+        color: #fff;
+      }
+
+      /* Avatar circle in navbar */
+      .navbar-avatar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.6rem;
+        height: 1.6rem;
+        border-radius: 50%;
+        background: rgba(255,255,255,.18);
+        color: #fff;
+        font-size: .72rem;
+        font-weight: 700;
+        line-height: 1;
+        flex-shrink: 0;
+        letter-spacing: 0;
+      }
+
+      /* Slightly larger avatar inside the open dropdown header */
+      .navbar-avatar--menu {
+        width: 2rem;
+        height: 2rem;
+        font-size: .85rem;
+        background: var(--bs-primary);
+        color: #fff;
+      }
+
       /* Space for fixed navbar so content isn't hidden underneath */
       body {
         padding-top: 72px; /* tweak if your navbar is taller/shorter */
@@ -208,26 +257,60 @@
 
             <div class="d-flex align-items-center gap-2">
                 {% if request.user.is_authenticated %}
-                    <!-- username is always leftmost on the right side -->
-                    <span class="navbar-text me-1">
-                        {{ request.user }}
-                    </span>
 
                     {% if request.user.is_superuser %}
-                        <a class="btn btn-outline-warning btn-sm" href="{% url 'admin:index' %}">
-                            Admin
-                        </a>
+                        <a class="btn btn-outline-warning btn-sm" href="{% url 'admin:index' %}">Admin</a>
                     {% endif %}
 
-                    {% if not "OIDC_ENABLED"|env %}
-                        <a class="btn btn-outline-light btn-sm"
-                           href="{% url 'password_change' %}"
-                           title="{% trans 'Change Password' %}">
-                            🔑
-                        </a>
-                    {% endif %}                    
+                    <!-- Account dropdown -->
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-navbar-account dropdown-toggle d-flex align-items-center gap-2 px-2"
+                                type="button"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                aria-label="Account menu">
+                            <!-- Avatar circle with first letter -->
+                            <span class="navbar-avatar" aria-hidden="true">
+                                {{ request.user.username|slice:":1"|upper }}
+                            </span>
+                            <span class="d-none d-sm-inline">{{ request.user }}</span>
+                        </button>
 
-                    <!-- Theme toggle next to Admin -->
+                        <ul class="dropdown-menu dropdown-menu-end shadow" style="min-width: 13rem;">
+                            <!-- Header -->
+                            <li>
+                                <span class="dropdown-header d-flex align-items-center gap-2">
+                                    <span class="navbar-avatar navbar-avatar--menu" aria-hidden="true">
+                                        {{ request.user.username|slice:":1"|upper }}
+                                    </span>
+                                    <span class="text-truncate" style="max-width: 9rem;">{{ request.user }}</span>
+                                </span>
+                            </li>
+                            <li><hr class="dropdown-divider my-1"></li>
+
+                            {% if not "OIDC_ENABLED"|env %}
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'password_change' %}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                                        <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2m3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2"/>
+                                    </svg>
+                                    {% trans 'Change Password' %}
+                                </a>
+                            </li>
+                            {% endif %}
+
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'myapp:api_tokens' %}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                                        <path d="M0 8a4 4 0 0 1 7.465-2H14a.5.5 0 0 1 .354.146l1.5 1.5a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708 0L13 9.207l-.646.647a.5.5 0 0 1-.708 0L11 9.207l-.646.647a.5.5 0 0 1-.708 0L9 9.207l-.646.647A.5.5 0 0 1 8 10h-.535A4 4 0 0 1 0 8m4-3a3 3 0 1 0 0 6 3 3 0 0 0 0-6m-.5 3a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0"/>
+                                    </svg>
+                                    API Tokens
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Theme toggle -->
                     <button type="button"
                             class="btn btn-outline-light btn-sm"
                             id="theme-toggle"
@@ -235,16 +318,16 @@
                         🌙
                     </button>
 
+                    <!-- Logout stays as a top-level button -->
                     <form method="post"
                           action="{% if 'OIDC_ENABLED'|env == True %}{% url 'oidc_logout' %}{% else %}{% url 'logout' %}{% endif %}"
                           class="d-inline">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-outline-light btn-sm">
-                            Logout
-                        </button>
+                        <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
                     </form>
+
                 {% else %}
-                    <!-- Not authenticated: keep toggle and login -->
+                    <!-- Not authenticated -->
                     <button type="button"
                             class="btn btn-outline-light btn-sm me-1"
                             id="theme-toggle"
