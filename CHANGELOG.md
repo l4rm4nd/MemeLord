@@ -1,3 +1,10 @@
+## [1.6.2](https://github.com/l4rm4nd/MemeLord/compare/v1.6.1...v1.6.2) (2026-07-03)
+
+
+### Bug Fixes
+
+* profile avatar size ([985629d](https://github.com/l4rm4nd/MemeLord/commit/985629def0f918a6dff67ceb263083e9e2f7d098))
+
 ## [1.6.1](https://github.com/l4rm4nd/MemeLord/compare/v1.6.0...v1.6.1) (2026-07-03)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * bump packages ([6f9bf3d](https://github.com/l4rm4nd/MemeLord/commit/6f9bf3df71d39f591da7adeec52532702d6dcfdb))
-
-## [1.5.17](https://github.com/l4rm4nd/MemeLord/compare/v1.5.16...v1.5.17) (2026-04-18)
-
-
-### Bug Fixes
-
-* trigger new ci with security jobs ([98d6ce0](https://github.com/l4rm4nd/MemeLord/commit/98d6ce0f866760475b40ab44625dce326aa54696))
 
