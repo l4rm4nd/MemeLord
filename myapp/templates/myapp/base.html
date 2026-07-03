@@ -108,10 +108,16 @@
         padding-top: 72px; /* tweak if your navbar is taller/shorter */
       }
     
-      @media (max-width: 575.98px) {
-        /* a bit more space on very small screens where navbar might wrap */
+      @media (max-width: 991.98px) {
+        /* extra space on mobile when collapsed navbar is closed */
         body {
-          padding-top: 82px;
+          padding-top: 72px;
+        }
+      }
+
+      @media (max-width: 575.98px) {
+        body {
+          padding-top: 64px;
         }
       }
     
@@ -239,45 +245,91 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="{% url 'myapp:meme_random' %}">
-                      Randomizer
-                  </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="{% url 'myapp:meme_statistics' %}">
-                    Statistics
-                </a>
-              </li>              
+                    <a class="nav-link" href="{% url 'myapp:meme_random' %}">
+                        Randomizer
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'myapp:meme_statistics' %}">
+                        Statistics
+                    </a>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'myapp:meme_upload' %}">
                         Upload
                     </a>
                 </li>
+
+                {# ── Mobile-only user section (flat links, no dropdown) ── #}
+                {% if request.user.is_authenticated %}
+                <li class="d-lg-none"><hr class="dropdown-divider border-secondary my-2"></li>
+                <li class="nav-item d-lg-none">
+                    <span class="nav-link text-white-50 small d-flex align-items-center gap-2 py-1">
+                        <span class="navbar-avatar" aria-hidden="true">{{ request.user.username|slice:":1"|upper }}</span>
+                        <strong class="text-white">{{ request.user }}</strong>
+                    </span>
+                </li>
+                {% if not "OIDC_ENABLED"|env %}
+                <li class="nav-item d-lg-none">
+                    <a class="nav-link" href="{% url 'password_change' %}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true" class="me-1">
+                            <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2m3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2"/>
+                        </svg>
+                        {% trans 'Change Password' %}
+                    </a>
+                </li>
+                {% endif %}
+                <li class="nav-item d-lg-none">
+                    <a class="nav-link" href="{% url 'myapp:api_tokens' %}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true" class="me-1">
+                            <path d="M0 8a4 4 0 0 1 7.465-2H14a.5.5 0 0 1 .354.146l1.5 1.5a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708 0L13 9.207l-.646.647a.5.5 0 0 1-.708 0L11 9.207l-.646.647a.5.5 0 0 1-.708 0L9 9.207l-.646.647A.5.5 0 0 1 8 10h-.535A4 4 0 0 1 0 8m4-3a3 3 0 1 0 0 6 3 3 0 0 0 0-6m-.5 3a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0"/>
+                        </svg>
+                        API Tokens
+                    </a>
+                </li>
+                <li class="d-lg-none"><hr class="dropdown-divider border-secondary my-2"></li>
+                <li class="nav-item d-flex d-lg-none align-items-center gap-2 px-2 pb-2">
+                    {% if request.user.is_superuser %}
+                        <a class="btn btn-outline-warning btn-sm" href="{% url 'admin:index' %}">Admin</a>
+                    {% endif %}
+                    <button type="button" class="btn btn-outline-light btn-sm" id="theme-toggle-mobile" aria-label="Toggle light/dark mode">🌙</button>
+                    <form method="post"
+                          action="{% if 'OIDC_ENABLED'|env == True %}{% url 'oidc_logout' %}{% else %}{% url 'logout' %}{% endif %}"
+                          class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
+                    </form>
+                </li>
+                {% else %}
+                <li class="nav-item d-flex d-lg-none align-items-center gap-2 px-2 pb-2">
+                    <button type="button" class="btn btn-outline-light btn-sm" id="theme-toggle-mobile" aria-label="Toggle light/dark mode">🌙</button>
+                    <a class="btn btn-outline-light btn-sm" href="{% url 'login' %}">Login</a>
+                </li>
+                {% endif %}
             </ul>
 
-            <div class="d-flex align-items-center gap-2">
+            {# ── Desktop-only right side: dropdown + theme + logout ── #}
+            <div class="d-none d-lg-flex align-items-center gap-2">
                 {% if request.user.is_authenticated %}
 
                     {% if request.user.is_superuser %}
                         <a class="btn btn-outline-warning btn-sm" href="{% url 'admin:index' %}">Admin</a>
                     {% endif %}
 
-                    <!-- Account dropdown -->
+                    <!-- Account dropdown (desktop only) -->
                     <div class="dropdown">
                         <button class="btn btn-sm btn-navbar-account dropdown-toggle d-flex align-items-center gap-2 px-2"
                                 type="button"
                                 data-bs-toggle="dropdown"
                                 aria-expanded="false"
                                 aria-label="Account menu">
-                            <!-- Avatar circle with first letter -->
                             <span class="navbar-avatar" aria-hidden="true">
                                 {{ request.user.username|slice:":1"|upper }}
                             </span>
-                            <span class="d-none d-sm-inline">{{ request.user }}</span>
+                            <span>{{ request.user }}</span>
                         </button>
 
                         <ul class="dropdown-menu dropdown-menu-end shadow" style="min-width: 13rem;">
-                            <!-- Header -->
                             <li>
                                 <span class="dropdown-header d-flex align-items-center gap-2">
                                     <span class="navbar-avatar navbar-avatar--menu" aria-hidden="true">
@@ -318,7 +370,7 @@
                         🌙
                     </button>
 
-                    <!-- Logout stays as a top-level button -->
+                    <!-- Logout -->
                     <form method="post"
                           action="{% if 'OIDC_ENABLED'|env == True %}{% url 'oidc_logout' %}{% else %}{% url 'logout' %}{% endif %}"
                           class="d-inline">
@@ -381,7 +433,7 @@
         // ignore storage errors
       }
 
-      const toggleBtns = document.querySelectorAll("#theme-toggle");
+      const toggleBtns = document.querySelectorAll("#theme-toggle, #theme-toggle-mobile");
       toggleBtns.forEach(btn => {
         btn.textContent = theme === "dark" ? "☀️" : "🌙";
       });
@@ -390,7 +442,7 @@
     // Sync icons with whatever the head script decided
     applyTheme(getCurrentTheme());
 
-    const toggleBtns = document.querySelectorAll("#theme-toggle");
+    const toggleBtns = document.querySelectorAll("#theme-toggle, #theme-toggle-mobile");
     toggleBtns.forEach(btn => {
       btn.addEventListener("click", function() {
         const current = getCurrentTheme();
