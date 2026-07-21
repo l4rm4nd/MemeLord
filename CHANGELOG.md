@@ -1,3 +1,10 @@
+## [1.6.4](https://github.com/l4rm4nd/MemeLord/compare/v1.6.3...v1.6.4) (2026-07-21)
+
+
+### Bug Fixes
+
+* bump pillow fix cves ([1e66db7](https://github.com/l4rm4nd/MemeLord/commit/1e66db730e6251d77e9f03ed4f2e83451b528b5f))
+
 ## [1.6.3](https://github.com/l4rm4nd/MemeLord/compare/v1.6.2...v1.6.3) (2026-07-03)
 
 
@@ -25,11 +32,4 @@
 ### Features
 
 * add api ([a7c43c7](https://github.com/l4rm4nd/MemeLord/commit/a7c43c7cb10c3d815e0efc2bb6da4047ed6cf354)), closes [#15](https://github.com/l4rm4nd/MemeLord/issues/15)
-
-## [1.5.19](https://github.com/l4rm4nd/MemeLord/compare/v1.5.18...v1.5.19) (2026-06-06)
-
-
-### Bug Fixes
-
-* bump django ([d003ea6](https://github.com/l4rm4nd/MemeLord/commit/d003ea6de3c090c0c81b63184fd683e5a05dd5cc))
 
