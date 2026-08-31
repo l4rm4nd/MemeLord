@@ -1,3 +1,10 @@
+## [1.6.6](https://github.com/l4rm4nd/MemeLord/compare/v1.6.5...v1.6.6) (2026-08-31)
+
+
+### Bug Fixes
+
+* Update entrypoint.sh ([d81878c](https://github.com/l4rm4nd/MemeLord/commit/d81878c9e6475d5aabad8ca55b3bce051ed6662a))
+
 ## [1.6.5](https://github.com/l4rm4nd/MemeLord/compare/v1.6.4...v1.6.5) (2026-08-06)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * profile avatar size ([985629d](https://github.com/l4rm4nd/MemeLord/commit/985629def0f918a6dff67ceb263083e9e2f7d098))
-
-## [1.6.1](https://github.com/l4rm4nd/MemeLord/compare/v1.6.0...v1.6.1) (2026-07-03)
-
-
-### Bug Fixes
-
-* use OS CSPRNG to solve bandit's B311 ([7ce2178](https://github.com/l4rm4nd/MemeLord/commit/7ce217822dd69b75bbb21f18dbc3ecaf66797026))
 
