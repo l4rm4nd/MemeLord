@@ -61,4 +61,4 @@ perform_migrations
 
 # Spawn the web server
 echo "[~] Spawning the application server"
-uwsgi --ini docker/docker_uwsgi.ini
+exec uwsgi --ini docker/docker_uwsgi.ini --die-on-term
