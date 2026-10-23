@@ -1,3 +1,10 @@
+## [1.6.7](https://github.com/l4rm4nd/MemeLord/compare/v1.6.6...v1.6.7) (2026-10-23)
+
+
+### Bug Fixes
+
+* bump libs ([53a6d81](https://github.com/l4rm4nd/MemeLord/commit/53a6d818e207a84b167ef6419d88e55f162dce1d))
+
 ## [1.6.6](https://github.com/l4rm4nd/MemeLord/compare/v1.6.5...v1.6.6) (2026-08-31)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * make new menu mobile responsive ([31edf6a](https://github.com/l4rm4nd/MemeLord/commit/31edf6a9bf371e3ca4c05121dc8ffb018f5fedf7))
-
-## [1.6.2](https://github.com/l4rm4nd/MemeLord/compare/v1.6.1...v1.6.2) (2026-07-03)
-
-
-### Bug Fixes
-
-* profile avatar size ([985629d](https://github.com/l4rm4nd/MemeLord/commit/985629def0f918a6dff67ceb263083e9e2f7d098))
 
