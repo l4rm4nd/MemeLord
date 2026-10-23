@@ -1,5 +1,5 @@
 # DEFAULT LIBS
-Django==5.2.17
+Django==5.2.18
 pytz==2023.3.post1
 python-dotenv==1.2.2
 psycopg2-binary==2.9.10
@@ -27,4 +27,4 @@ azure-storage-blob==12.27.1
 google-cloud-storage==3.6.0
 
 # APP SPECIFIC
-Pillow==12.3.0
+Pillow==13.0.0
